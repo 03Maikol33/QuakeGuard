@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>QuakeGuard - Terremoto</title>
+    <link href="css/font.css" rel="stylesheet">
+    <link href="css/general.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=arrow_back_ios_new" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            color: white;
+            font-family: cereal;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-image: url(resources/texture/dark_black.png);
+            margin: 0;
+            overflow: hidden;
+            font-family: Nunito, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        .headerBar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            height: 80px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            background-image: url(resources/texture/dark_black.png);
+            z-index: 10;
+        }
+        .goToSiteContainer {
+            display: none;
+            height: 25px;
+            width: 100%;
+            background-color: green;
+            color: white;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        #gotoSiteButton {
+            display: none;
+        }
+        #goBackButton {
+            position: fixed;
+            left: 10px;
+            width: fit-content;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        #map {
+            width: 100%;
+            height: 100vh;
+            background-color: black;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+        .bottomInfoBar {
+            z-index: 10;
+            position : fixed;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            height: auto;
+            width: 100vw;
+            height: fit-content;
+            background-image: url(resources/texture/dark_black.png);
+        }
+
+        .leaflet-popup-tip {
+            background-image: url(resources/texture/dark_black.png);
+            background-color: transparent;
+        }
+
+            .leaflet-popup-content-wrapper {
+            background-color: transparent;
+            color: white;
+            background-image: url(resources/texture/dark_black.png);
+            font-family: Nunito, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="headerBar">
+        QuakeGuard.it
+        <a href="https://www.quakeguard.altervista.org/">
+            <div class="goToSiteContainer" id="goToSiteButton">Visita il sito ufficiale QuakeGuard</div>
+        </a>
+        <a><div onclick="chiudiMappaSpecifica()" class="goToSiteContainer" id="goBackButton"><span class="material-symbols-outlined" style="font-size: 12px;">
+            arrow_back_ios_new
+            </span>Indietro</div></a>
+    </div>
+    <div id="map"></div>
+
+    <div class="bottomInfoBar" id="bottomInfoBar">
+        <h3 id="titolo">Titolo del terremoto</h3>
+        <p id="magnitudo">Magnitudo</p>
+        <p id="profondita">Profondità</p>
+        <p id="dataOra">Data e ora</p>
+    </div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+
+        function chiudiMappaSpecifica() {
+            window.parent.chiudiMappaSpecifica();
+            console.log("chiudiMappaSpecifica");
+        }
+
+
+
+
+        var pinSize = 24;
+        var pinGreen = L.icon({
+        iconUrl: 'resources/pinGreen.svg', 
+        iconSize: [pinSize, pinSize],
+        iconAnchor: [12, 24],
+        popupAnchor: [0, -24]
+    });
+    var pinOrange = L.icon({
+        iconUrl: 'resources/pinOrange.svg',
+        iconSize: [pinSize, pinSize],  
+        iconAnchor: [12, 24],
+        popupAnchor: [0, -24] 
+    });
+    var pinRed = L.icon({
+        iconUrl: 'resources/pinRed.svg',
+        iconSize: [pinSize, pinSize],
+        iconAnchor: [12, 24],
+        popupAnchor: [0, -24]
+    });
+    var pinPurple = L.icon({
+        iconUrl: 'resources/pinPurple.svg',
+        iconSize: [pinSize, pinSize],
+        iconAnchor: [12, 24],
+        popupAnchor: [0, -24]
+    });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const idTerremoto = urlParams.get('eventId');
+        const mapType = urlParams.get('mapType');
+        const external = urlParams.get('external');
+        const url = `https://webservices.ingv.it/fdsnws/event/1/query?eventid=${idTerremoto}&format=xml`;
+        
+        const goToSiteButton = document.getElementById('goToSiteButton');
+        const goBackButton = document.getElementById('goBackButton');
+        if (external==1) {
+            goToSiteButton.style.display = 'block';
+            goBackButton.style.display = 'none';
+        }
+        else {
+            goToSiteButton.style.display = 'none';
+            goBackButton.style.display = 'block';
+        }
+
+
+        fetch(url)
+            .then(response => response.text())
+            .then(data => {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(data, "text/xml");
+                const event = xmlDoc.getElementsByTagName("event")[0];
+                
+                if (!event) {
+                    alert("Errore. Il link non è valido o il terremoto non esiste più");
+                    return;
+                }
+                
+                const description = event.getElementsByTagName("description")[0].getElementsByTagName("text")[0].textContent;
+                const magnitude = parseFloat(event.getElementsByTagName("magnitude")[0].getElementsByTagName("value")[0].textContent);
+                const depth = event.getElementsByTagName("origin")[0].getElementsByTagName("depth")[0].getElementsByTagName("value")[0].textContent / 1000;
+                const time = new Date(event.getElementsByTagName("origin")[0].getElementsByTagName("value")[0].textContent).toLocaleString();
+                const latitude = parseFloat(event.querySelector("latitude > value").textContent);
+                const longitude = parseFloat(event.querySelector("longitude > value").textContent);
+                
+                document.getElementById("bottomInfoBar").innerHTML="<strong><h2>" + description + "</h2><br>" + "</strong><strong style='color:green'>Magnitudo: </strong>" + magnitude + "<br><strong style='color:green'>Data e ora: </strong>" + time + "<br><strong style='color:green'>Profondità: </strong>" + depth + "km";
+/*
+                document.getElementById('titolo').textContent = description;
+                document.getElementById('magnitudo').textContent = `Magnitudo: ${magnitude}`;
+                document.getElementById('profondita').textContent = `Profondità: ${depth} km`;
+                document.getElementById('dataOra').textContent = `Data e ora: ${time}`;*/
+                
+                const map = L.map('map').setView([latitude, longitude], 10);
+              /*  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);*/
+
+                // Mappa Scura
+    var darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(map);
+    // Mappa Chiara
+    var lightLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    });
+    //Mappa satellitare
+    var satelliteLayer = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+        maxZoom: 19,
+        subdomains:['mt0','mt1','mt2','mt3'],
+        attribution: '&copy; <a href="https://www.google.com">Google</a>'
+});
+
+    switch (mapType) {
+        case 'dark':
+            darkLayer.addTo(map);
+            break;
+        case 'light':
+            lightLayer.addTo(map);
+            break;
+        case 'satellite':
+            satelliteLayer.addTo(map);
+            break;
+        default:
+            lightLayer.addTo(map);
+            break;
+    }
+
+                //decide il colore del marker in base alla magnitudo
+                var pinIcon;
+                if (magnitude < 2.5) {
+                    pinIcon = pinGreen;
+                } else if (magnitude >= 2.5 && magnitude <= 3.5) {
+                    pinIcon = pinOrange;
+                } else if (magnitude > 3.5 && magnitude <= 4.5) {
+                    pinIcon = pinRed;
+                } else {
+                    pinIcon = pinPurple;
+                }
+                /**
+                let color;
+                if (magnitude < 2.5) color = 'green';
+                else if (magnitude >= 2.5 && magnitude <= 3.5) color = 'orange';
+                else if (magnitude > 3.5 && magnitude <= 4.5) color = 'red';
+                else color = 'purple';*/
+                
+                let a = L.marker([latitude, longitude], {icon: pinIcon}).addTo(map);
+                /*var popup = L.popup().setContent(info);*/
+                a.bindPopup("<strong>" + description + "<br>" + "</strong><strong style='color:green'>Magnitudo: </strong>" + magnitude + "<br><strong style='color:green'>Data e ora: </strong>" + time + "<br><strong style='color:green'>Profondità: </strong>" + depth + "km").openPopup();
+
+                
+            })
+            .catch(error => console.error('Errore:', error));
+    </script>
+</body>
+</html>

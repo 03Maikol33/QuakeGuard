@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modalità Segreta</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      color: white;
+      font-family: 'Arial', sans-serif;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .gamepad {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 3vw;
+      max-width: 90vw;
+    }
+
+    .dpad, .actions {
+      display: grid;
+      gap: 1vw;
+    }
+
+    .dpad {
+      grid-template-areas:
+        ". up ."
+        "left . right"
+        ". down .";
+    }
+
+    .actions {
+      grid-template-areas:
+        "b"
+        "a";
+    }
+
+    .konami-btn, .start-button {
+      font-size: 4vw;
+      width: 15vw;
+      height: 15vw;
+      max-width: 80px;
+      max-height: 80px;
+      min-width: 30px;
+      min-height: 30px;
+      background-color: #222;
+      color: #fff;
+      border: 2px solid #fff;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .start-button {
+      margin-top: 3vh;
+      width: 30vw;
+      height: 10vw;
+      max-width: 120px;
+      max-height: 50px;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="gamepad">
+    <div class="dpad">
+      <button class="konami-btn" style="grid-area: up" data-key="up">↑</button>
+      <button class="konami-btn" style="grid-area: left" data-key="left">←</button>
+      <button class="konami-btn" style="grid-area: right" data-key="right">→</button>
+      <button class="konami-btn" style="grid-area: down" data-key="down">↓</button>
+    </div>
+    <div class="actions">
+      <button class="konami-btn" style="grid-area: b" data-key="b">B</button>
+      <button class="konami-btn" style="grid-area: a" data-key="a">A</button>
+    </div>
+  </div>
+
+  <button class="start-button" id="startBtn">START</button>
+  <canvas id="confetti"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <script>
+    const secretCode = ['up','up','down','down','left','right','left','right','b','a'];
+    let sequence = [];
+
+    document.querySelectorAll('.konami-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        sequence.push(btn.dataset.key);
+        if (sequence.length > 20) sequence.shift();
+      });
+    });
+
+    document.getElementById("startBtn").addEventListener("click", () => {
+      const recent = sequence.slice(-secretCode.length);
+      if (JSON.stringify(recent) === JSON.stringify(secretCode)) {
+        triggerConfetti();
+        sequence = [];
+      } else {
+        sequence = [];
+      }
+    });
+
+    function triggerConfetti() {
+      const duration = 3000;
+      const end = Date.now() + duration;
+      const interval = setInterval(() => {
+        if (Date.now() > end) return clearInterval(interval);
+        confetti({
+          particleCount: 50,
+          spread: 360,
+          origin: { x: Math.random(), y: Math.random() - 0.2 }
+        });
+      }, 250);
+    }
+  </script>
+</body>
+</html>

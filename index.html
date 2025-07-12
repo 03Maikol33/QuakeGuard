@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>QuakeGuard.it</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+
+    <!-- Favicon -->
+    <link href="resources/icon.png" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500&family=Jost:wght@500;600;700&display=swap" rel="stylesheet"> 
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/animate/animate.min.css" rel="stylesheet">
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="css/style.css" rel="stylesheet">
+</head>
+
+<body data-bs-spy="scroll" data-bs-target=".navbar" data-bs-offset="51">
+    <div class="container-xxl bg-black p-0">
+        <!-- Spinner Start -->
+        <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+            <div class="spinner-grow text-primary" style="width: 3rem; height: 3rem;" role="status">
+                <span class="sr-only">Caricamento...</span>
+            </div>
+        </div>
+        <!-- Spinner End -->
+
+
+        <!-- Navbar & Hero Start -->
+        <div class="container-xxl position-relative p-0" id="home">
+            <nav class="navbar navbar-expand-lg navbar-light px-4 px-lg-5 py-3 py-lg-0">
+                <a href="" class="navbar-brand p-0">
+                    <h2 style="color: white;">QuakeGuard.it</h2>
+                    <!-- <img src="img/logo.png" alt="Logo"> -->
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                    <span class="fa fa-bars text-white"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <div class="navbar-nav mx-auto py-0">
+                        <a href="#home" class="active text-white">Home</a>
+                        <a href="#about" class="text-white">Informazioni</a>
+                        <a href="#feature" class="text-white">Funzionalità</a>
+                        <a href="#download" class="text-white">Come scaricare</a>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container-xxl bg-primary hero-header">
+                <div class="container px-lg-5">
+                    <div class="row g-5">
+                        <div class="col-lg-8 text-center text-lg-start">
+                            <h1 class="text-white mb-4 animated slideInDown">Prova ora QuakeGuard.<br>Rimani informato!</h1>
+                            <p class="text-white pb-3 animated slideInDown">QuakeGuard è una web app per il monitoraggio dei terremoti in tempo reale. Con la nostra piattaforma, puoi visualizzare informazioni dettagliate e una mappa interattiva sugli eventi sismici in Italia e nel mondo, restando sempre aggiornato con dati accurati.</p>
+                            <a href="app/" style="background-color: green; border-radius: 5px; color: white;" class="btn py-sm-3 px-4 px-sm-5 rounded-pill me-3 animated slideInLeft">Lancia l'app</a>
+                        </div>
+                        <div class="col-lg-4 d-flex justify-content-center justify-content-lg-end wow fadeInUp" data-wow-delay="0.3s">
+                            <div class="owl-carousel screenshot-carousel">
+                                <img class="img-fluid" src="resources/screenshot-1.png" alt="">
+                                <img class="img-fluid" src="resources/screenshot-2.png" alt="">
+                                <img class="img-fluid" src="resources/screenshot-3.png" alt="">
+                                <img class="img-fluid" src="resources/screenshot-4.png" alt="">
+                                <img class="img-fluid" src="resources/screenshot-5.png" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Navbar & Hero End -->
+
+
+        <!-- About Start -->
+        <div class="container-xxl py-5" id="about">
+            <div class="container py-5 px-lg-5">
+                <div class="row g-5 align-items-center">
+                    <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <h5 class="text-white pb-3 fw-medium">Informazioni</h5>
+                        <h1 class="mb-4">Rimani sempre aggiornato!</h1>
+                        <p class="text-white">Con QuakeGuard rimani sempre aggiornato sugli utlimi terremoti. Non c'è bisogno di download perché QuakeGuard è una WebApp subito disponibile, intuitiva e facile da usare. I dati sono verificati e provengono dall'INGV.</p>
+                    </div>
+                    <div class="col-lg-6">
+                        <img class="img-fluid wow fadeInUp" data-wow-delay="0.5s" src="resources/about.png">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- About End -->
+
+
+        <!-- Features Start -->
+        <div class="container-xxl py-5" id="feature">
+            <div class="container py-5 px-lg-5">
+                <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                    <h5 class="text-white fw-medium">Funzioni dell'app</h5>
+                    <h1 class="mb-5">Fantastiche Funzionalità</h1>
+                </div>
+                <div class="row g-4">
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="feature-item bg-dark rounded p-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-primary-gradient rounded-circle mb-4" style="width: 60px; height: 60px;">
+                                <i class="fa fa-map text-white fs-4"></i>
+                            </div>
+                            <h5 class="mb-3">Mappa Interattiva</h5>
+                            <p class="text-white">Esplora gli eventi sismici tramite la mappa interattiva.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="feature-item bg-dark rounded p-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-secondary-gradient rounded-circle mb-4" style="width: 60px; height: 60px;">
+                                <i class="fa fa-list text-white fs-4"></i>
+                            </div>
+                            <h5 class="mb-3">Lista Aggiornata</h5>
+                            <p class="text-white">La lista di terremoti è sempre aggiornata tramite l'API di INGV.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                        <div class="feature-item bg-dark rounded p-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-primary-gradient rounded-circle mb-4" style="width: 60px; height: 60px;">
+                                <i class="fa fa-shield-alt text-white fs-4"></i>
+                            </div>
+                            <h5 class="mb-3">Dati Sicuri</h5>
+                            <p class="text-white">I dati mostrati sono sempre affidabili poichè provengono da fonti ufficiali e verificate.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="feature-item bg-dark rounded p-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-secondary-gradient rounded-circle mb-4" style="width: 60px; height: 60px;">
+                                <i class="fa fa-share-alt text-white fs-4"></i>
+                            </div>
+                            <h5 class="mb-3">Condividi</h5>
+                            <p class="text-white">Condividi i terremoti e informa anche i tuoi amici e le persone a te care.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="feature-item bg-dark rounded p-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-primary-gradient rounded-circle mb-4" style="width: 60px; height: 60px;">
+                                <i class="fa fa-bookmark text-white fs-4"></i>
+                            </div>
+                            <h5 class="mb-3">Salva</h5>
+                            <p class="text-white">Salva i terremoti nella tua lista in modo da poterli consultare in un secondo momento.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                        <div class="feature-item bg-dark rounded p-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-secondary-gradient rounded-circle mb-4" style="width: 60px; height: 60px;">
+                                <i class="fa fa-arrow-down text-white fs-4"></i>
+                            </div>
+                            <h5 class="mb-3">Nessun Download</h5>
+                            <p class="text-white">Non c'è bisogno di scaricare l'applicazione, è tutto online. QuakeGuard è una WebApp, non occuperà spazio sul tuo dispositivo.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Features End -->
+
+
+        <!-- Screenshot Start -->
+        <div class="container-xxl py-5">
+            <div class="container py-5 px-lg-5">
+                <div class="row g-5 align-items-center">
+                    <div class="col-lg-8 wow fadeInUp" data-wow-delay="0.1s">
+                        <h5 class="text-white fw-medium">Screenshot</h5>
+                        <h1 class="mb-4">Interfaccia User Friendly e facile da usare.</h1>
+                        <p class="text-white">QuakeGuard è progettata per essere intuitiva e facile da usare, offrendo un'interfaccia semplice e chiara per accedere rapidamente alle informazioni sui terremoti.</p>
+                    </div>
+                    <div class="col-lg-4 d-flex justify-content-center justify-content-lg-end wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="owl-carousel screenshot-carousel">
+                            <img class="img-fluid" src="resources/screenshot-1.png" alt="">
+                            <img class="img-fluid" src="resources/screenshot-2.png" alt="">
+                            <img class="img-fluid" src="resources/screenshot-3.png" alt="">
+                            <img class="img-fluid" src="resources/screenshot-4.png" alt="">
+                            <img class="img-fluid" src="resources/screenshot-5.png" alt="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Screenshot End -->
+
+
+        <!-- Process Start -->
+        <div id="download" class="container-xxl py-5">
+            <div class="container py-5 px-lg-5">
+                <div class="text-center pb-4 wow fadeInUp" data-wow-delay="0.1s">
+                    <h5 class="text-white fw-medium">Salvare l'app</h5>
+                    <h1 class="mb-5">Pochi passi e nessun download</h1>
+                </div>
+                <div class="row gy-5 gx-4 justify-content-center">
+                    <div class="col-lg-4 col-sm-6 text-center pt-4 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="position-relative bg-light rounded pt-5 pb-4 px-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-primary-gradient rounded-circle position-absolute top-0 start-50 translate-middle shadow" style="width: 100px; height: 100px;">
+                                <i class="fab fa-apple fa-3x text-white"></i>
+                            </div>
+                            <h5 class="mt-4 mb-3">Ios</h5>
+                            <p class="mb-0"><ul>
+                                <li><strong>Apri Safari</strong>: Sul tuo iPhone o iPad, apri l'app Safari. È importante utilizzare Safari perché è l'unico browser su iOS che permette di aggiungere un sito web alla schermata Home.</li>
+                                <li><strong>Visita QuakeGuard</strong>: Inserisci l'URL di QuakeGuard nella barra degli indirizzi e premi "Vai".</li>
+                                <li><strong>Tocca il pulsante Condividi</strong>: Una volta caricato il sito web, tocca il pulsante "Condividi". L'icona è un quadrato con una freccia verso l'alto, situato nella parte inferiore dello schermo su iPhone o nella parte superiore su iPad.</li>
+                                <li><strong>Seleziona "Aggiungi a schermata Home"</strong>: Nel menu Condividi che appare, scorri verso il basso e seleziona l'opzione "Aggiungi a schermata Home". Potrebbe essere necessario scorrere un po' per trovarla.</li>
+                                <li><strong>Personalizza il nome della web app</strong>: Apparirà una schermata in cui puoi modificare il nome della web app. Questo sarà il nome visualizzato sotto l'icona sulla schermata Home. Modifica il nome se desideri, poi premi "Aggiungi" nell'angolo in alto a destra.</li>
+                                <li><strong>Visualizza l'icona sulla schermata Home</strong>: Dopo aver toccato "Aggiungi", Safari si chiuderà automaticamente e vedrai l'icona di QuakeGuard sulla tua schermata Home, proprio come un'app.</li>
+                                <li><strong>Apri QuakeGuard</strong>: Ora puoi toccare l'icona di QuakeGuard sulla schermata Home per aprire il sito web direttamente in modalità a schermo intero, come una web app.</li>
+                            </ul>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-sm-6 text-center pt-4 wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="position-relative bg-light rounded pt-5 pb-4 px-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-secondary-gradient rounded-circle position-absolute top-0 start-50 translate-middle shadow" style="width: 100px; height: 100px;">
+                                <i class="fab fa-android fa-3x text-white"></i>
+                            </div>
+                            <h5 class="mt-4 mb-3">Android</h5>
+                            <p class="mb-0"><ul>
+                                <li><strong>Apri il browser Chrome</strong>: Sul tuo dispositivo Android, apri l'app Chrome. Questa è l'app migliore per aggiungere un sito web alla schermata Home su Android.</li>
+                                <li><strong>Visita QuakeGuard</strong>: Inserisci l'URL di QuakeGuard nella barra degli indirizzi e premi "Vai".</li>
+                                <li><strong>Tocca il menu a tre punti</strong>: Una volta caricato il sito web, tocca l'icona del menu a tre punti verticali nell'angolo in alto a destra dello schermo.</li>
+                                <li><strong>Seleziona "Aggiungi a schermata Home"</strong>: Nel menu che appare, seleziona l'opzione "Aggiungi a schermata Home".</li>
+                                <li><strong>Conferma il nome della web app</strong>: Apparirà un popup che ti permette di modificare il nome della web app. Questo sarà il nome visualizzato sotto l'icona sulla schermata Home. Se il nome è corretto, tocca "Aggiungi".</li>
+                                <li><strong>Tocca "Aggiungi automaticamente"</strong>: Chrome ti chiederà di confermare l'aggiunta alla schermata Home. Seleziona "Aggiungi automaticamente" per completare il processo.</li>
+                                <li><strong>Visualizza l'icona sulla schermata Home</strong>: Ora vedrai l'icona di QuakeGuard sulla schermata Home del tuo dispositivo Android, proprio come un'app.</li>
+                                <li><strong>Apri QuakeGuard</strong>: Tocca l'icona di QuakeGuard sulla schermata Home per aprire il sito web direttamente in modalità a schermo intero, come una web app.</li>
+                            </ul>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Process Start -->
+
+        <!-- Credits Start-->
+        <div id="download" class="container-xxl py-5">
+            <div class="container py-5 px-lg-5">
+                <div class="text-center pb-4 wow fadeInUp" data-wow-delay="0.1s">
+                    <h5 class="text-white fw-medium">Credits</h5>
+                    <h1 class="mb-5">Sviluppata da</h1>
+                </div>
+                <div class="row gy-5 gx-4 justify-content-center">
+                    <div class="col-lg-4 col-sm-6 text-center pt-4 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="position-relative bg-light rounded pt-5 pb-4 px-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-primary-gradient rounded-circle position-absolute top-0 start-50 translate-middle shadow" style="width: 100px; height: 100px; overflow: hidden;">
+                                <img style="width: 100%;" src="resources/maikol.jpg">
+                            </div>
+                            <h5 class="mt-4 mb-3">Maikol Gasparroni</h5>
+                            <p class="mb-0">
+                                <a class="text-white" style="text-decoration: underline;" href="https://www.instagram.com/maikol_gasparroni/"><p class="mb-0 text-white"><i class="fab fa-instagram me-3 text-white"></i>Instagram</p></a>
+                                <a class="text-white" style="text-decoration: underline;" href="https://maikolgasparroni2003.altervista.org/"><p class="mb-0 text-white"><i class="fa fa-globe me-3 text-white"></i>Sito Web</p></a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Credits end-->
+
+        <!-- Download Start -->
+        <div class="container-xxl py-5">
+            <div class="container py-5 px-lg-5">
+                <div class="row g-5 align-items-center">
+                    <div class="col-lg-6">
+                        <img class="img-fluid wow fadeInUp" data-wow-delay="0.1s" src="resources/about.png">
+                    </div>
+                    <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.3s">
+                        <h5 class="text-white fw-medium">Inizia ORA</h5>
+                        <h1 class="mb-4">Inizia ora ad usare QuakeGuard</h1>
+                        <div class="text-center row g-4" style="display: flex; justify-content: center;">
+                            <a href="app/" style="background-color: green; border-radius: 5px; color: white; max-width: 300px;" class="btn py-sm-3 px-4 px-sm-5 rounded-pill me-3 animated slideInLeft">Lancia l'app</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Download End -->
+        
+        <!-- Footer Start -->
+        <div class="container-fluid bg-primary text-light footer wow fadeIn" data-wow-delay="0.1s">
+            <div class="container py-5 px-lg-5">
+                <div class="row g-5">
+                    <div class="col-md-6 col-lg-3">
+                        <p id="contatti"><i class="fa fa-envelope me-3"></i>maikolgasparroni2003@altervista.org</p>
+                        <div class="d-flex pt-2">
+                            <a class="btn btn-outline-light btn-social" href="https://www.instagram.com/quakeguard.it/"><i class="fab fa-instagram text-white"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <h4 class="text-white mb-4">Link utili</h4>
+                        <a class="btn btn-link text-white" href="https://maikolgasparroni2003.altervista.org/QuakeGuard/infoLegali.html">Info Legali</a>
+                    </div>
+                </div>
+            </div>
+            <div class="container px-lg-5">
+                <div class="copyright">
+                    <div class="row">
+                        <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                            &copy; <a class="border-bottom text-white" href="#">Maikol Gasparroni</a>, Tutti i diritti riservati. 
+							<br>
+							<!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
+							Creato Da <a class="border-bottom text-white" href="https://htmlcodex.com">HTML Codex</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Footer End -->
+
+
+        <!-- Back to Top -->
+        <a href="#" class="btn btn-lg btn-lg-square back-to-top pt-2"><i class="bi bi-arrow-up text-white"></i></a>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/wow/wow.min.js"></script>
+    <script src="lib/easing/easing.min.js"></script>
+    <script src="lib/waypoints/waypoints.min.js"></script>
+    <script src="lib/counterup/counterup.min.js"></script>
+    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+
+    <!-- Template Javascript -->
+    <script src="js/main.js"></script>
+</body>
+
+</html>

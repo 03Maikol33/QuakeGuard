@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mappa Terremoti</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.4.0/ol.css">
+  <link rel="stylesheet" href="css/font.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+
+
+    /*Impedisci di evidenziare e copiare i testi*/
+    body {
+      -webkit-user-select: none; /* Safari */
+      -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* IE10+/Edge */
+      user-select: none; /* Standard */
+    }
+
+    #map {
+      width: 100%;
+      height: 80vh;
+      background-color: black;
+    }
+    
+    .pin {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 1px solid black;
+    }
+    .pin.green {
+      background-color: green;
+    }
+    .pin.orange {
+      background-color: orange;
+    }
+    .pin.red {
+      background-color: red;
+    }
+    .pin.purple {
+      background-color: purple;
+    }
+    
+    .infoBox{
+      background-color: rgba(0, 0, 0, 0.85);
+      color: white;
+      font-family: cereal;
+      font-size: 10px;
+      border: 1px solid white;
+      padding: 5px;
+      border-radius: 5px;
+    }
+
+
+    .pinWave{
+      width: 25px;
+      height: 25px;
+      background-color: transparent;
+      border: 2px solid black;
+      border-radius: 50%;
+      animation: crescere 1s infinite;
+    }
+    .pinWave.green{
+      border-color: green;
+    }
+    .pinWave.orange{
+      border-color: orange;
+    }
+    .pinWave.red{
+      border-color: red;
+    }
+    .pinWave.purple{
+      border-color: purple;
+    }
+
+    @keyframes crescere {
+      from {
+        transform: scale(1);
+        opacity: 1;
+      }
+      to {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+  </style>
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ol@v7.4.0/dist/ol.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      var map = new ol.Map({
+        target: 'map',
+        layers: [
+          new ol.layer.Tile({
+            source: new ol.source.OSM()
+          })
+        ],
+        view: new ol.View({
+          center: ol.proj.fromLonLat([12.5674, 41.8719]), // Coordinate di default per centrare la mappa sull'Italia
+          zoom: 6 // Zoom di default
+        })
+      });
+
+      var selectedOverlay = null;
+
+      //ottieni data e ora e formatta l'url
+      const today = new Date();
+      const threeDaysAgo = new Date(today);
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+      const startTime = threeDaysAgo.toISOString();
+      const endTime = today.toISOString();
+
+      const url = `https://webservices.ingv.it/fdsnws/event/1/query?limit=120&orderby=time&format=xml&starttime=${startTime}&endtime=${endTime}`;
+      /////////////////////////////////////
+
+      fetch(url)
+        .then(function(response) {
+          return response.text();
+        })
+        .then(function(data) {
+          var parser = new DOMParser();
+          var xmlDoc = parser.parseFromString(data, 'application/xml');
+          var events = xmlDoc.getElementsByTagName('event');
+
+          for (var i = 0; i < events.length; i++) {
+            var event = events[i];
+            var magnitude = parseFloat(event.querySelector('mag > value').textContent);
+            var pinWaveColor;
+            var pinColor;
+            if (magnitude < 2.5) {
+              pinColor = 'green';
+              pinWaveColor='green';
+            } else if (magnitude >= 2.5 && magnitude <= 3.5) {
+              pinColor = 'orange';
+              pinWaveColor='orange';
+            } else if (magnitude > 3.5 && magnitude <= 4.5) {
+              pinColor = 'red';
+              pinWaveColor='red';
+            } else {
+              pinColor = 'purple';
+              pinWaveColor='purple';
+            }
+
+            var latitude = parseFloat(event.querySelector('latitude > value').textContent);
+            var longitude = parseFloat(event.querySelector('longitude > value').textContent);
+
+            //crea la div pin
+            var pin = document.createElement('div');
+            pin.className = 'pin ' + pinColor;
+            pin.id=i;
+            // Utilizza una funzione di chiusura per catturare il valore di i
+            pin.onclick = (function(id) {
+                return function() {
+                    apriChiudiInfo(id);
+                };
+            })(i);
+            
+            //crea l'overlay per la div pin
+            var overlay = new ol.Overlay({
+              position: ol.proj.fromLonLat([longitude, latitude]),
+              positioning: 'center-center',
+              element: pin,
+              stopEvent: false
+            });
+
+            //crea la div infoBox
+            var infoBox = document.createElement('div');
+            infoBox.className = 'infoBox';
+            infoBox.id=i;
+            infoBox.style.display='none';
+
+            //prende i dati del terremoto
+            const description = event.getElementsByTagName("description")[0];
+            const origin = event.getElementsByTagName("origin")[0];
+
+            const time = formatDateTime(origin.getElementsByTagName("value")[0].textContent);
+            const location = description.getElementsByTagName("text")[0].textContent;
+            const depth = origin.getElementsByTagName("depth")[0].getElementsByTagName("value")[0].textContent/1000;
+           
+
+            infoBox.innerHTML='<strong>'+location+'<br>'+'</strong><strong style="color:yellow">Magnitudo: </strong>'+magnitude+'<br><strong style="color:yellow">Data e ora: </strong>'+time+'<br><strong style="color:yellow">Profondità: </strong>'+depth+'km';
+
+
+            //crea l'overlay per la infoBox
+            var overlayInfoBox = new ol.Overlay({
+              position: ol.proj.fromLonLat([longitude, latitude]),
+              positioning: 'right-right',
+              element: infoBox,
+              stopEvent: false
+            });
+
+            //aggiungi i due overlay alla mappa
+            map.addOverlay(overlay);
+            map.addOverlay(overlayInfoBox);
+
+            //aggiungi il pinWave solo agli ultimi 5 terremoti
+            if(i>=events.length-5){
+              var pinWave = document.createElement('div');
+                pinWave.className='pinWave ' + pinWaveColor;
+
+                var overlay2 = new ol.Overlay({
+                  position: ol.proj.fromLonLat([longitude, latitude]),
+                  positioning: 'center-center',
+                  element: pinWave,
+                  stopEvent: false
+                });
+                map.addOverlay(overlay2);
+            }
+/**/
+            
+
+          }
+        })
+        .catch(function(error) {
+          console.log('Error:', error);
+        });
+    });
+
+
+    function formatDateTime(dateTime) {
+      const date = new Date(dateTime);
+      const formattedDate = formatDate(date);
+      const hours = parseInt(date.getHours().toString().padStart(2, '0'))+2;//non so il perchè ma si deve aggiungere 2 all'ora pk la query ingv da un risultato sbagliato
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      if(hours!=24 && hours!=25){
+        return `${formattedDate} alle ${hours}:${minutes}`;
+      }else{
+        if(hours==24){
+          return `${formattedDate} alle 00:${minutes}`;
+        }
+        if(hours==25){
+          return `${formattedDate} all' 1:${minutes}`;
+        }
+      }
+    }
+
+    function formatDate(date) {
+      const currentDate = new Date().toDateString();
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      if (date.toDateString() === currentDate) {
+        return 'oggi';
+      } else if (date.toDateString() === yesterday.toDateString()) {
+        return 'ieri';
+      } else {
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+      }
+    }
+
+
+    function apriChiudiInfo(id){
+      var infoBox = document.getElementById(id);
+
+      // Verifica lo stato attuale dell'infoBox e apri o chiudi di conseguenza
+      if (infoBox.style.display === 'none') {
+          infoBox.style.display = 'block';
+      } else {
+          infoBox.style.display = 'none';
+      }
+    }
+
+    //opzioni per la mappa
+    document.addEventListener('DOMContentLoaded', function() {
+      var open = false;
+      var mapOverlayButtons=document.querySelector('.ol-zoom.ol-unselectable.ol-control');
+      mapOverlayButtons.innerHTML="";//<a href='mappa.html'><button><span class='material-symbols-outlined'>settings</span></button></a>";
+      
+    });
+  </script>
+</body>
+</html>

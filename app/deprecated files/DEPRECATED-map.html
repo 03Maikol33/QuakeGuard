@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mappa Terremoti</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.4.0/ol.css">
+  <link rel="stylesheet" href="css/font.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+
+
+    /*Impedisci di evidenziare e copiare i testi*/
+    body {
+      -webkit-user-select: none; /* Safari */
+      -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* IE10+/Edge */
+      user-select: none; /* Standard */
+    }
+
+    #map {
+      width: 100%;
+      height: 100vh;
+      background-color: black;
+    }
+    
+    .pin {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 1px solid black;
+      /**/
+      -webkit-box-shadow: -2.5px 3.75px 5px 0.25px #585858a7;
+-moz-box-shadow: -2.5px 3.75px 5px 0.25px #585858a7;
+box-shadow: -2.25px 3.75px 5px 0.25px #585858a7;
+    }
+    
+    .recent{
+      transform: scale(2);
+    }
+    .infoBox{
+      background-color: rgba(0, 0, 0, 0.85);
+      color: white;
+      font-family: cereal;
+      font-size: 10px;
+      border: 1px solid white;
+      padding: 5px;
+      border-radius: 5px;
+      background-image: url(texture.png);
+    }
+
+    @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(5);
+                opacity: 0;
+            }
+        }
+        .pulse-icon {
+          animation: pulse 2s infinite;
+          width: 20px;
+          height: 20px;
+          margin-left: -10px; /* Offset per centrare l'icona */
+          margin-top: -10px;  /* Offset per centrare l'icona */
+        }
+
+
+    /*nuovo*/
+  .leaflet-popup-tip{
+    background-image: url(resources/texture.png);
+    background-color: transparent;
+  }
+
+  .leaflet-popup-content-wrapper{
+    background-color: transparent;
+    color:white;
+    background-image: url(resources/texture.png);
+    font-family: Nunito,system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+  </style>
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <!--<script src="https://cdn.jsdelivr.net/npm/ol@v7.4.0/dist/ol.js"></script>-->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    
+    //estrai le informazioni dall'url
+    const urlParams = new URLSearchParams(window.location.search);
+    let pinSize = urlParams.get('pinSize');
+    pinSize = (pinSize=== null) ? "normal" : pinSize;
+    pinSize = (pinSize=="normal") ? 24 : (pinSize=="medium")? 34 : 44;
+    //da aggiungere pin wave
+    /*
+    var pinWaveGreen = L.divIcon({
+    className: 'ripple' // Aggiungi la classe 'ripple' per l'onda circolare
+    });*/
+    // Definisci l'icona personalizzata
+    var pinGreen = L.icon({
+    iconUrl: 'resources/pinGreen.svg', 
+    iconSize: [pinSize, pinSize],
+    iconAnchor: [12, 24],
+    popupAnchor: [0, -24]
+});
+var pinOrange = L.icon({
+    iconUrl: 'resources/pinOrange.svg',
+    iconSize: [pinSize, pinSize],  
+    iconAnchor: [12, 24],
+    popupAnchor: [0, -24] 
+});
+var pinRed = L.icon({
+    iconUrl: 'resources/pinRed.svg',
+    iconSize: [pinSize, pinSize],
+    iconAnchor: [12, 24],
+    popupAnchor: [0, -24]
+});
+var pinPurple = L.icon({
+    iconUrl: 'resources/pinPurple.svg', // URL dell'immagine per il marker
+    iconSize: [pinSize, pinSize],  // Dimensioni dell'icona
+    iconAnchor: [12, 24], // Punto di ancoraggio dell'icona rispetto al marker
+    popupAnchor: [0, -24] // Punto di ancoraggio del popup rispetto all'icona
+});
+
+var map = L.map('map').setView([42.5, 12.5], 5);
+
+//mappa satellitare
+/*
+L.tileLayer('https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2018_3857/default/g/{z}/{x}/{y}.jpg', {
+    maxZoom: 18,
+    attribution: 'Imagery © EOX IT Services GmbH &mdash; Source: Sentinel-2 data'
+}).addTo(map);
+*/
+//tiles mappa scura
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+}).addTo(map);
+
+//ottieni data e ora e formatta l'url
+const today = new Date();
+      const threeDaysAgo = new Date(today);
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+      const startTime = threeDaysAgo.toISOString();
+      const endTime = today.toISOString();
+
+      const url = `https://webservices.ingv.it/fdsnws/event/1/query?limit=120&orderby=time&format=xml&starttime=${startTime}&endtime=${endTime}`;
+let pinWaveColor="";
+fetch(url)
+    .then(function(response) {
+        return response.text();
+    })
+    .then(function(data) {
+        var parser = new DOMParser();
+        var xmlDoc = parser.parseFromString(data, 'application/xml');
+        var events = xmlDoc.getElementsByTagName('event');
+
+        for (var i = 0; i < events.length; i++) {
+            var event = events[i];
+            var magnitude = parseFloat(event.querySelector('mag > value').textContent);
+            var latitude = parseFloat(event.querySelector('latitude > value').textContent);
+            var longitude = parseFloat(event.querySelector('longitude > value').textContent);
+
+            var pinIcon;
+            if (magnitude < 2.5) {
+                pinIcon = pinGreen;
+                pinWaveColor = "Green";
+            } else if (magnitude >= 2.5 && magnitude <= 3.5) {
+                pinIcon = pinOrange;
+                pinWaveColor = "Orange";
+            } else if (magnitude > 3.5 && magnitude <= 4.5) {
+                pinIcon = pinRed;
+                pinWaveColor = "Red";
+            } else {
+                pinIcon = pinPurple;
+                pinWaveColor = "Purple";
+            }
+
+            //ottengo info e descrizione
+            //prende i dati del terremoto
+            const description = event.getElementsByTagName("description")[0];
+            const origin = event.getElementsByTagName("origin")[0];
+
+            const time = formatDateTime(origin.getElementsByTagName("value")[0].textContent);
+            const location = description.getElementsByTagName("text")[0].textContent;
+            const depth = origin.getElementsByTagName("depth")[0].getElementsByTagName("value")[0].textContent/1000;
+           
+
+            let info="<strong>"+location+"<br>"+"</strong><strong style='color:green'>Magnitudo: </strong>"+magnitude+"<br><strong style='color:green'>Data e ora: </strong>"+time+"<br><strong style='color:green'>Profondità: </strong>"+depth+"km";
+
+            let a = L.marker([latitude, longitude], {icon: pinIcon}).addTo(map)
+            // Creo il popup personalizzato
+            var popup = L.popup().setContent(info);
+            
+            
+            // Aggiungo il popup al marker
+            a.bindPopup(popup);
+        }
+    })
+    .catch(function(error) {
+        console.log('Error:', error);
+    });
+
+
+    function formatDateTime(dateTime) {
+      const date = new Date(dateTime);
+      const formattedDate = formatDate(date);
+      const hours = parseInt(date.getHours().toString().padStart(2, '0'))+2;//non so il perchè ma si deve aggiungere 2 all'ora pk la query ingv da un risultato sbagliato
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      if(hours!=24 && hours!=25){
+        return `${formattedDate} alle ${hours}:${minutes}`;
+      }else{
+        if(hours==24){
+          return `${formattedDate} alle 00:${minutes}`;
+        }
+        if(hours==25){
+          return `${formattedDate} all' 1:${minutes}`;
+        }
+      }
+    }
+
+    function formatDate(date) {
+      const currentDate = new Date().toDateString();
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      if (date.toDateString() === currentDate) {
+        return 'oggi';
+      } else if (date.toDateString() === yesterday.toDateString()) {
+        return 'ieri';
+      } else {
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+      }
+    }
+
+
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      var elements = document.querySelectorAll('.leaflet-control-zoom.leaflet-bar.leaflet-control');
+      var elements2 = document.querySelectorAll('.leaflet-control-attribution.leaflet-control');
+      elements.forEach(function(element) {
+          element.style.display = 'none';
+      });
+      elements2.forEach(function(element) {
+          element.style.display = 'none';
+      });
+    });
+</script>
+</body>
+</html>

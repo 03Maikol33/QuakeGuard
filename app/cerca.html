@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>cerca</title>
+    <link rel="stylesheet" href="css/font.css">
+    <!--per mappa-->
+    <script src="https://cdn.jsdelivr.net/npm/ol@v7.4.0/dist/ol.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.4.0/ol.css">
+</head>
+<style>
+
+    /*SLIDER*/
+    input[type='range'] {
+  -webkit-appearance: none; /* Rimuove lo stile predefinito */
+  width: 100%; /* Specifica una larghezza */
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  display: flex;
+  align-items: center;
+  align-content: center;
+  width: 100%;
+  height: 5px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  background: green; /* Colore dello sfondo */
+  border-radius: 1.3px;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  border: 1px solid #000000;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  background-image: url(resources/texture//light_black.png); /* Colore del cursore */
+  cursor: pointer;
+  -webkit-appearance: none; /* Rimuove lo stile predefinito */
+}
+
+    /**//**//**/
+
+
+    #earthquake-list{
+        width: 100%;
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .earthquake {
+    /*  border: 1px solid #ddd;*/
+      padding: 10px;
+      padding-bottom: 14px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      background-color: #282828;
+      background-image: url('resources/texture/light_black.png');
+      transition: width 1s ease;
+      width: 90%;
+    }
+
+    .earthquake:hover{
+        background-color: #313131;
+    }
+
+    .earthquake .title {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .earthquake .info {
+      margin-bottom: 5px;
+    }
+
+    .earthquake .details {
+      font-size: 12px;
+      color: #999;
+    }
+
+
+    .miniInfoText{
+        color:#555555;
+        font-size: 10px;
+        cursor: pointer;
+    }
+    .valMagnitude{
+        font-size: 30px;
+        border-radius: 5px;
+        padding: 2px;
+        padding-left: 5px;
+        padding-right: 5px;
+
+    }
+    .containerBottoni{
+        padding: 2px;
+    }
+
+    .earthquake svg{
+        padding-right: 20px;
+    }
+    .earthquake>div{
+        margin-bottom: 5px;
+    }
+</style>
+<style>
+    body{
+        background-color: transparent;
+        color: white;
+        font-family: Nunito;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
+    }
+
+    .containerPubblica{
+        border-radius: 5px;
+        width: 90%;
+        padding: 15px;
+        background-color: #282828;;
+        background-image: url(resources/texture/light_black.png);
+        display: flex;
+        flex-direction: column;
+    }
+    .allineaRiga>input, .allineaColonna>input{
+        width: 100%;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        background-image: url(resources/texture/dark_black.png);
+        color: white;
+        font-family: Nunito;
+        border: none;
+        text-align: center;
+        margin-bottom: 10px;
+        min-height: 20px;
+    }
+
+    textarea{
+        background-image: url(resources/texture/dark_black.png);
+        color: white;
+        font-family: Nunito;
+        border: none;
+    }
+
+    #invioBtn{
+        background-color: green;
+        border-radius: 5px;
+        padding: 5px;
+        color: white;
+        font-family: Nunito;
+        border: none;
+        font-size: 15px;
+        margin-top: 5px;
+    }
+
+    .allineaRiga{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        /*background-color: rebeccapurple;*/
+        width: 100%;
+    }
+    .allineaColonna{
+        display: flex;
+        flex-direction: column;
+        /*background-color: red;*/
+    }
+
+    /*cose per la mappa*/
+    .containerMappa{
+      height: 80vh;
+      width: 100%;
+      border: none;
+    }
+    .map{
+      height: 200px;
+      width: 100%;
+    }
+
+    .pin {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 1px solid black;
+    }
+    .pin.green {
+      background-color: green;
+    }
+    .pin.orange {
+      background-color: orange;
+    }
+    .pin.red {
+      background-color: red;
+    }
+    .pin.purple {
+      background-color: purple;
+    }
+
+    .pinWave{
+      width: 15px;
+      height: 15px;
+      background-color: transparent;
+      border: 2px solid black;
+      border-radius: 50%;
+      animation: crescere 1s infinite;
+    }
+    .pinWave.green{
+      border-color: green;
+    }
+    .pinWave.orange{
+      border-color: orange;
+    }
+    .pinWave.red{
+      border-color: red;
+    }
+    .pinWave.purple{
+      border-color: purple;
+    }
+
+    @keyframes crescere {
+      from {
+        transform: scale(1);
+        opacity: 1;
+      }
+      to {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+
+</style> 
+<body>
+    <div class="containerPubblica">
+            <div class="allineaRiga">
+                <div class="allineaColonna">
+                    <label for="#giornoPartenza">Dal giorno</label>
+                    <input required type="date"  id="giornoPartenza">
+                </div>
+                <div class="allineaColonna">
+                    <label for="#giornoArrivo">al giorno</label>
+                    <input required type="date"  id="giornoArrivo">
+                </div>
+                <div class="allineaColonna">
+                    <label for="#magnitudoPartenza">Dalla magnitudo</label>
+                    <input required type="range" oninput="changeMagnitude('minMagnitudeValue')" min="0" max="100" value="0" id="magnitudoPartenza" placeholder="0.0">
+                    <p id="minMagnitudeParagraph">0.0</p>
+                </div>
+                <div class="allineaColonna">
+                    <label for="#magnitudoArrivo">alla magnitudo</label>
+                    <input required type="range" oninput="changeMagnitude('maxMagnitudeValue')" min="0" max="100" value="100" id="magnitudoArrivo" placeholder="0.0">
+                    <p id="maxMagnitudeParagraph">10.0</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center;"><input id="invioBtn" type="button" onclick="cerca()" value="Cerca"></div>
+    </div>
+    <p id="testoDaRimuovere">Effettua una ricerca per proseguire.</p>
+
+    <!--Script per impostare le date di default-->
+    <script>
+      var date = new Date();
+      date.setDate(date.getDate() - 1);
+      var dateString = date.toISOString().split('T')[0];
+      document.getElementById('giornoPartenza').value = dateString;
+      date = new Date();
+      dateString = date.toISOString().split('T')[0];
+      document.getElementById('giornoArrivo').value = dateString;
+      </script>
+    <!---->
+
+    <!--lista terremoti-->
+    <div id="earthquake-list">
+        <!--TERREMOTO DI ESEMPIO-->
+        <div class="earthquake" id="terremotoEsempioNoMap" style="display: none;">
+          <div class="title">Luna, cratere ovest</div>
+          <div class="info-">
+            <strong><a class="valMagnitude">3.2</a></strong>Ml <br><p><strong>Profondità:</strong>12 km</p>
+          </div>
+          <div class="details">oggi alle 12:00</div>
+          <div class="containerBottoni">
+            <svg onclick='hideShowMap("+earthquakeDiv.id+")' viewBox='0 0 576 512' height='24' xmlns='http://www.w3.org/2000/svg'><path d='m288 0c-69.59 0-126 56.41-126 126 0 56.26 82.35 158.8 113.9 196.02 6.39 7.54 17.82 7.54 24.2 0 31.55-37.22 113.9-139.76 113.9-196.02 0-69.59-56.41-126-126-126zm0 168c-23.2 0-42-18.8-42-42s18.8-42 42-42 42 18.8 42 42-18.8 42-42 42zm-267.88 47.95a32.006 32.006 0 0 0 -20.12 29.71v250.32c0 11.32 11.43 19.06 21.94 14.86l138.06-62.84v-233.08c-8.84-15.98-16.07-31.54-21.25-46.42zm267.88 143.72c-14.07 0-27.38-6.18-36.51-16.96-19.66-23.2-40.57-49.62-59.49-76.72v182l192 64v-245.99c-18.92 27.09-39.82 53.52-59.49 76.72-9.13 10.77-22.44 16.95-36.51 16.95zm266.06-198.51-138.06 62.84v288l139.88-55.95a31.996 31.996 0 0 0 20.12-29.71v-250.32c0-11.32-11.43-19.06-21.94-14.86z' fill='white'/></svg>
+            <svg onclick='share("+earthquakeDiv.id+")' xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M0 0h24v24H0V0z' fill='none'/><path d='M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z' fill='white'/></svg>
+          </div>
+        </div>
+        <!--FINE TERREMOTO DI ESEMPIO-->
+        <!--TERREMOTO DI ESEMPIO-->
+        <div class="earthquake" id="terremotoEsempioMap" style="display: none;">
+          <div class="title">Luna, cratere ovest</div>
+          <div class="info-">
+            <strong><a class="valMagnitude">3.2</a></strong>Ml <br><p><strong>Profondità:</strong>12 km</p>
+          </div>
+          <div class="details">oggi alle 12:00</div>
+          <div class="containerBottoni">
+            <svg onclick='hideShowMap("+earthquakeDiv.id+")' viewBox='0 0 576 512' height='24' xmlns='http://www.w3.org/2000/svg'><path d='m288 0c-69.59 0-126 56.41-126 126 0 56.26 82.35 158.8 113.9 196.02 6.39 7.54 17.82 7.54 24.2 0 31.55-37.22 113.9-139.76 113.9-196.02 0-69.59-56.41-126-126-126zm0 168c-23.2 0-42-18.8-42-42s18.8-42 42-42 42 18.8 42 42-18.8 42-42 42zm-267.88 47.95a32.006 32.006 0 0 0 -20.12 29.71v250.32c0 11.32 11.43 19.06 21.94 14.86l138.06-62.84v-233.08c-8.84-15.98-16.07-31.54-21.25-46.42zm267.88 143.72c-14.07 0-27.38-6.18-36.51-16.96-19.66-23.2-40.57-49.62-59.49-76.72v182l192 64v-245.99c-18.92 27.09-39.82 53.52-59.49 76.72-9.13 10.77-22.44 16.95-36.51 16.95zm266.06-198.51-138.06 62.84v288l139.88-55.95a31.996 31.996 0 0 0 20.12-29.71v-250.32c0-11.32-11.43-19.06-21.94-14.86z' fill='white'/></svg>
+            <svg onclick='share("+earthquakeDiv.id+")' xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M0 0h24v24H0V0z' fill='none'/><path d='M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z' fill='white'/></svg>
+          </div>
+          <div id="map-terremotoEsempioMap" class="map"></div>
+          <p style="display: none;" id="latitudine">12</p>
+          <p style="display: none;" id="longitudine">12</p>
+        </div>
+        <!--FINE TERREMOTO DI ESEMPIO-->
+      </div>
+
+      <!--SCRIPT PER LA CONDIVISIONE DI DATI TRA localStorage della pagina GENITORE-->
+      <script>
+        // Funzione per inviare i dati alla pagina genitore per memorizzarli nel localStorage
+        function saveEarthquake(idTerremoto) {
+            window.parent.saveEarthquake(idTerremoto);
+        }
+      </script>
+      <!---->
+
+    <script lang="JavaScript">
+
+        function cerca(){
+            document.getElementById('testoDaRimuovere').style.display='none';
+            document.getElementById("earthquake-list").innerHTML="";
+            var magnitudoDal = document.getElementById('magnitudoPartenza');
+            var magnitudoAl = document.getElementById('magnitudoArrivo');
+            if(magnitudoDal>magnitudoAl || magnitudoAl<magnitudoDal){
+                alert("Errore, la magnitudo minima deve essere inferiore alla magnitudo massima");
+                return;
+            }
+            //inserire un controllo per verificare se le date sono corrette o messe al contrario
+            fetchEarthquakes();
+        }
+
+        function isValidFractionalNumber(text) {
+            const regex = /^\d\.\d$/;
+            return regex.test(text);
+        }
+
+        function fetchEarthquakes(){
+            var starttime = document.getElementById("giornoPartenza").value+"T00:00:00";
+            var endtime = document.getElementById("giornoArrivo").value+"T00:00:00";
+            var minmagnitude = document.getElementById("magnitudoPartenza").value/10;
+            var maxmagnitude = document.getElementById("magnitudoArrivo").value/10;
+
+            console.log(starttime+'\n'+endtime+'\n'+minmagnitude+'\n'+maxmagnitude+'\n');
+
+            const url = "https://webservices.ingv.it/fdsnws/event/1/query?starttime="+starttime+"&endtime="+endtime+"&minmagnitude="+minmagnitude+"&maxmagnitude="+maxmagnitude+"&format=xml";
+            console.log(url);
+            fetch(url)
+        .then(response => response.text())
+        .then(data => {
+
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(data, "text/xml");
+          const events = xmlDoc.getElementsByTagName("event");
+
+          if (events.length === 0) {
+            const noDataMessage = `<p>Nessun terremoto trovato.</p>`;
+            document.querySelector("#earthquake-list").innerHTML = noDataMessage;
+            return;
+          }
+          contatore=0;
+          const earthquakeList = document.querySelector("#earthquake-list");
+          for (let i = 0; i < events.length; i++) {
+            contatore++;
+            const event = events[i];
+            const earthquakeDiv = createEarthquakeElement(event);
+            earthquakeList.appendChild(earthquakeDiv);
+          }
+
+        })
+        .catch(error => {
+          console.log(error);
+        });
+        }
+
+    function share(id){
+      const earthquakeDiv=document.getElementById(id);
+      const idTerremoto=earthquakeDiv.getElementById('idTerremoto');
+      var url = "https://www.maikolgasparroni2003.altervista.org/QuakeGuard/specificVisualizer.html?";
+      url+="eventId="+idTerremoto;
+      // menu condivisione (c'è bisogno di una connessione https)
+      navigator.share({
+      title: 'QuakeGuard.it',
+      text: "⚠️C'è stato un terremoto!⚠️\n "+url+" \n by QuakeGuard.it"
+      })
+      //fine menu*/
+    }
+
+    function hideShowMap(id){
+      const earthquakeDiv = document.getElementById(id);
+      if(earthquakeDiv.querySelector('#map-'+id).innerHTML.length>0){
+        console.log("togliMappa");
+        animazioneDelungamento(id);
+        earthquakeDiv.querySelector('#map-'+id).style.display='none';
+        earthquakeDiv.querySelector('#map-'+id).innerHTML='';
+      }else{
+        console.log('mettiMappa');
+        animazioneAllungamento(id);
+        earthquakeDiv.querySelector('#map-'+id).style.display="block";
+        var latitude = earthquakeDiv.querySelector('#latitudine').innerHTML;
+        var longitude = earthquakeDiv.querySelector('#longitudine').innerHTML;
+        var map = new ol.Map({
+          target: 'map-'+id,
+          layers: [
+            new ol.layer.Tile({
+              source: new ol.source.OSM()
+            })
+          ],
+          view: new ol.View({
+            center: ol.proj.fromLonLat([longitude, latitude]), // Coordinate di default per centrare la mappa sull'Italia
+            zoom: 14 // Zoom di default
+          })
+        });
+              var magnitude = parseFloat(earthquakeDiv.querySelector('.valMagnitude').innerHTML);
+              console.log(magnitude);
+              var pinColor;
+              var pinWaveColor;
+              if (magnitude < 2.5) {
+                pinColor = 'green';
+                pinWaveColor='green';
+              } else if (magnitude >= 2.5 && magnitude <= 3.5) {
+                pinColor = 'orange';
+                pinWaveColor='orange';
+              } else if (magnitude > 3.5 && magnitude <= 4.5) {
+                pinColor = 'red';
+                pinWaveColor='red';
+              } else {
+                pinColor = 'purple';
+                pinWaveColor='purple';
+              }
+
+              
+
+              var pin = document.createElement('div');
+              pin.className = 'pin ' + pinColor;
+
+              var overlay = new ol.Overlay({
+                position: ol.proj.fromLonLat([longitude, latitude]),
+                positioning: 'center-center',
+                element: pin,
+                stopEvent: false
+              });
+
+              var pinWave = document.createElement('div');
+              pinWave.className='pinWave ' + pinWaveColor;
+
+              var overlay2 = new ol.Overlay({
+                position: ol.proj.fromLonLat([longitude, latitude]),
+                positioning: 'center-center',
+                element: pinWave,
+                stopEvent: false
+              });
+
+              map.addOverlay(overlay);
+              map.addOverlay(overlay2);
+            }
+    }
+
+
+
+        function formatDate(date) {
+      const currentDate = new Date().toDateString();
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      if (date.toDateString() === currentDate) {
+        return 'oggi';
+      } else if (date.toDateString() === yesterday.toDateString()) {
+        return 'ieri';
+      } else {
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+      }
+    }
+
+    function formatDateTime(dateTime) {
+      const date = new Date(dateTime);
+      const formattedDate = formatDate(date);
+      const hours = parseInt(date.getHours().toString().padStart(2, '0'))+2;//non so il perchè ma si deve aggiungere 2 all'ora pk la query ingv da un risultato sbagliato
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+
+      return `${formattedDate} alle ${hours}:${minutes}`;
+    }
+
+    function createEarthquakeElement(event) {
+      const description = event.getElementsByTagName("description")[0];
+      const magnitude = event.getElementsByTagName("magnitude")[0];
+      const origin = event.getElementsByTagName("origin")[0];
+
+      const time = formatDateTime(origin.getElementsByTagName("value")[0].textContent);
+      const location = description.getElementsByTagName("text")[0].textContent;
+      const depth = origin.getElementsByTagName("depth")[0].getElementsByTagName("value")[0].textContent;
+      const magnitudeValue = magnitude.getElementsByTagName("value")[0].textContent;
+      const latitudeElement = event.querySelector('latitude > value');
+        const longitudeElement = event.querySelector('longitude > value');
+        let latitude = latitudeElement ? latitudeElement.textContent : null;
+        let longitude = longitudeElement ? longitudeElement.textContent : null;
+
+      //OTTIENI L'ID UNIVOCO DELL'EVENTO
+      let eventId = event.getAttribute('publicID');
+      eventId = new URLSearchParams(eventId.split('?')[1]).get('eventId');
+      ////////////////
+
+      const earthquakeDiv = document.createElement("div");
+      earthquakeDiv.className = "earthquake";
+      earthquakeDiv.id=contatore;
+      
+
+      const title = document.createElement("div");
+      title.className = "title";
+      title.id='title-'+contatore;
+      title.textContent = location;
+      earthquakeDiv.appendChild(title);
+
+      const info = document.createElement("div");
+      info.className = "info-"+contatore;
+      info.id='info-'+contatore;
+      info.innerHTML = `<strong><a class='valMagnitude'>${magnitudeValue}</a></strong> Ml<br><p id='valDepth'><strong>Profondità:</strong> ${depth} km</p>`;
+      const contenitoreMagnitudo = info.querySelector(".valMagnitude");
+      contenitoreMagnitudo.id='magnitudo-'+contatore;
+      if(parseFloat(contenitoreMagnitudo.textContent)<2.5){
+        contenitoreMagnitudo.style.backgroundColor="green";
+      }
+      if(parseFloat(contenitoreMagnitudo.textContent)>=2.5 && parseFloat(contenitoreMagnitudo.textContent)<=3.5){
+        contenitoreMagnitudo.style.backgroundColor="orange";
+      }
+      if(parseFloat(contenitoreMagnitudo.textContent)>3.5 && parseFloat(contenitoreMagnitudo.textContent)<=5.5){
+        contenitoreMagnitudo.style.backgroundColor="red";
+      }
+      if(parseFloat(contenitoreMagnitudo.textContent)>5.5){
+        contenitoreMagnitudo.style.backgroundColor="purple";
+      }
+      earthquakeDiv.appendChild(info);
+
+      const details = document.createElement("div");
+      details.className = "details";
+      details.id='details-'+contatore;
+      details.textContent = time;
+      earthquakeDiv.appendChild(details);
+
+      const buttons = document.createElement("div");
+      buttons.className="containerBottoni";
+      buttons.innerHTML="<svg onclick='hideShowMap("+earthquakeDiv.id+")' viewBox='0 0 576 512' height='24' xmlns='http://www.w3.org/2000/svg'><path d='m288 0c-69.59 0-126 56.41-126 126 0 56.26 82.35 158.8 113.9 196.02 6.39 7.54 17.82 7.54 24.2 0 31.55-37.22 113.9-139.76 113.9-196.02 0-69.59-56.41-126-126-126zm0 168c-23.2 0-42-18.8-42-42s18.8-42 42-42 42 18.8 42 42-18.8 42-42 42zm-267.88 47.95a32.006 32.006 0 0 0 -20.12 29.71v250.32c0 11.32 11.43 19.06 21.94 14.86l138.06-62.84v-233.08c-8.84-15.98-16.07-31.54-21.25-46.42zm267.88 143.72c-14.07 0-27.38-6.18-36.51-16.96-19.66-23.2-40.57-49.62-59.49-76.72v182l192 64v-245.99c-18.92 27.09-39.82 53.52-59.49 76.72-9.13 10.77-22.44 16.95-36.51 16.95zm266.06-198.51-138.06 62.84v288l139.88-55.95a31.996 31.996 0 0 0 20.12-29.71v-250.32c0-11.32-11.43-19.06-21.94-14.86z' fill='white'/></svg>";
+      buttons.innerHTML+="<svg onclick='share("+earthquakeDiv.id+")' xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M0 0h24v24H0V0z' fill='none'/><path d='M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z' fill='white'/></svg>";
+      buttons.innerHTML+="<svg onclick='saveEarthquake("+eventId+")' xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 -960 960 960' width='24'><path d='M200-120v-640q0-33 23.5-56.5T280-840h240v80H280v518l200-86 200 86v-278h80v400L480-240 200-120Zm80-640h240-240Zm400 160v-80h-80v-80h80v-80h80v80h80v80h-80v80h-80Z' fill='white'/></svg>";
+      earthquakeDiv.appendChild(buttons);
+
+      
+      const flagMenuCondivisione=document.createElement('p');
+      flagMenuCondivisione.style.display="none";
+      flagMenuCondivisione.id='flagMenuCondivisione';
+      flagMenuCondivisione.innerHTML="0";
+      earthquakeDiv.appendChild(flagMenuCondivisione);
+
+      const mappa = document.createElement('div');
+      mappa.id='map-'+contatore;
+      mappa.className='map';
+      mappa.style.display='none';
+      earthquakeDiv.appendChild(mappa);
+
+      const paragrafoLongitudine= document.createElement('p');
+      paragrafoLongitudine.style.display="none";
+      paragrafoLongitudine.id='longitudine';
+      paragrafoLongitudine.innerHTML=longitude;
+      earthquakeDiv.appendChild(paragrafoLongitudine);
+
+      const paragrafoLatitudine= document.createElement('p');
+      paragrafoLatitudine.style.display="none";
+      paragrafoLatitudine.id='latitudine';
+      paragrafoLatitudine.innerHTML=latitude;
+      earthquakeDiv.appendChild(paragrafoLatitudine);
+
+      //aggiungo un paragrafo nascosco per l'id
+      const idTerremoto = document.createElement('p');
+      idTerremoto.style.display='none';
+      idTerremoto.id='idTerremoto';
+      idTerremoto.innerHTML=eventId;
+      earthquakeDiv.appendChild(idTerremoto);
+
+      if(eventId=='1895389' || eventId=='7073641'){//terremoto dell'Aquila e di Amatrice
+        const paragrafoMemoriale = document.createElement('p');
+        paragrafoMemoriale.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path fill="white" d="M640-440q-46-42-89.5-82.5t-77-79.5Q440-641 420-677.5T400-748q0-56 38-94t94-38q32 0 60 13.5t48 36.5q20-23 48-36.5t60-13.5q56 0 94 38t38 94q0 34-20 70.5T806.5-602Q773-563 730-522.5T640-440Zm0-108q59-56 109.5-111.5T800-748q0-23-14.5-37.5T748-800q-14 0-26.5 5.5T700-778l-60 72-60-72q-9-11-21.5-16.5T532-800q-23 0-37.5 14.5T480-748q0 33 50.5 88.5T640-548ZM560-60l-280-78v58H40v-440h318l248 92q33 12 53.5 42t20.5 66h80q50 0 85 33t35 87v40L560-60ZM120-160h80v-280h-80v280Zm438 16 238-74q-3-11-13.5-16.5T760-240H568q-31 0-56-4t-54-14l-69-24 23-76 80 26q18 6 42 9t66 3q0-11-6.5-21T578-354l-234-86h-64v220l278 76ZM200-300Zm400-20Zm-400 20Zm80 0Zm360-374Z"/></svg>Per non dimenticare.';
+          earthquakeDiv.appendChild(paragrafoMemoriale);
+      }
+
+      return earthquakeDiv;
+    }
+
+    //aggiorna i valori dello slider delle magnitudo
+
+    const minMagnitude = document.getElementById('magnitudoPartenza');
+    const maxMagnitude = document.getElementById('magnitudoArrivo');
+
+    const minMagnitudeParagraph = document.getElementById('minMagnitudeParagraph');
+    const maxMagnitudeParagraph = document.getElementById('maxMagnitudeParagraph');
+
+    function changeMagnitude(quale){
+      if(quale == 'minMagnitudeValue'){
+        minMagnitudeParagraph.innerHTML = minMagnitude.value/10;
+        return;
+      }
+      if(quale == 'maxMagnitudeValue'){
+        maxMagnitudeParagraph.innerHTML = maxMagnitude.value/10;
+      }
+    }
+    //mostra e nascondi le singole mappe
+    function hideShowMap(id){
+      const earthquakeDiv = document.getElementById(id);
+      if(earthquakeDiv.querySelector('#map-'+id).innerHTML.length>0){
+        console.log("togliMappa");
+        earthquakeDiv.querySelector('#map-'+id).style.display='none';
+        earthquakeDiv.querySelector('#map-'+id).innerHTML='';
+      }else{
+        console.log('mettiMappa');
+        earthquakeDiv.querySelector('#map-'+id).style.display="block";
+        var latitude = earthquakeDiv.querySelector('#latitudine').innerHTML;
+        var longitude = earthquakeDiv.querySelector('#longitudine').innerHTML;
+        var map = new ol.Map({
+          target: 'map-'+id,
+          layers: [
+            new ol.layer.Tile({
+              source: new ol.source.OSM()
+            })
+          ],
+          view: new ol.View({
+            center: ol.proj.fromLonLat([longitude, latitude]), // Coordinate di default per centrare la mappa sull'Italia
+            zoom: 14 // Zoom di default
+          })
+        });
+              var magnitude = parseFloat(earthquakeDiv.querySelector('.valMagnitude').innerHTML);
+              console.log(magnitude);
+              var pinColor;
+              var pinWaveColor;
+              if (magnitude < 2.5) {
+                pinColor = 'green';
+                pinWaveColor='green';
+              } else if (magnitude >= 2.5 && magnitude <= 3.5) {
+                pinColor = 'orange';
+                pinWaveColor='orange';
+              } else if (magnitude > 3.5 && magnitude <= 4.5) {
+                pinColor = 'red';
+                pinWaveColor='red';
+              } else {
+                pinColor = 'purple';
+                pinWaveColor='purple';
+              }
+
+              
+
+              var pin = document.createElement('div');
+              pin.className = 'pin ' + pinColor;
+
+              var overlay = new ol.Overlay({
+                position: ol.proj.fromLonLat([longitude, latitude]),
+                positioning: 'center-center',
+                element: pin,
+                stopEvent: false
+              });
+
+              var pinWave = document.createElement('div');
+              pinWave.className='pinWave ' + pinWaveColor;
+
+              var overlay2 = new ol.Overlay({
+                position: ol.proj.fromLonLat([longitude, latitude]),
+                positioning: 'center-center',
+                element: pinWave,
+                stopEvent: false
+              });
+
+              map.addOverlay(overlay);
+              map.addOverlay(overlay2);
+            }
+    }
+
+
+    //condividi il terremoto
+    function share(id){
+      
+      const earthquakeDiv=document.getElementById(id);
+
+      const idTerremoto=earthquakeDiv.querySelector('#idTerremoto').innerHTML;
+      //crea url
+      var url = "https://www.maikolgasparroni2003.altervista.org/QuakeGuard/specificVisualizer.html?";
+      url+="eventId="+idTerremoto;
+      // menu condivisione (c'è bisogno di una connessione https)
+      navigator.share({
+      title: 'QuakeGuard.it',
+      text: "⚠️C'è stato un terremoto!⚠️\n "+url+" \n by QuakeGuard.it"
+      })
+      //fine menu*/
+    }
+    </script>
+</body>
+</html>

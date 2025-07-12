@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>QuakeGuard - terremoto</title>
+    <link href="css/font.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.4.0/ol.css">
+</head>
+<style>
+    body{
+        overflow: hidden;
+        color: white;
+        font-family: cereal;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: clamp(1rem, 0.3043rem + 3.4783vw, 3rem);
+        background-image: url(resources/texture.png);
+    }
+
+    .bottomInfoBar{
+        overflow: scroll;
+        display: flex;
+        align-items: top;
+        justify-content: left;
+        flex-direction: column;
+        padding-left: 10px;
+        height: 100%;
+        width: 100%;
+        background-image: url(resources/earthquakeTexture.png);
+    }
+
+
+    #map {
+        z-index: 0;
+      width: 100%;
+      height: 100%;
+      background-color: black;
+    }
+    
+    .pin {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 1px solid black;
+    }
+    .pin.green {
+      background-color: green;
+    }
+    .pin.orange {
+      background-color: orange;
+    }
+    .pin.red {
+      background-color: red;
+    }
+    .pin.purple {
+      background-color: purple;
+    }
+    
+    .pinWave{
+      width: 15px;
+      height: 15px;
+      background-color: transparent;
+      border: 2px solid black;
+      border-radius: 50%;
+      animation: crescere 1s infinite;
+    }
+    .pinWave.green{
+      border-color: green;
+    }
+    .pinWave.orange{
+      border-color: orange;
+    }
+    .pinWave.red{
+      border-color: red;
+    }
+    .pinWave.purple{
+      border-color: purple;
+    }
+
+    @keyframes crescere {
+      from {
+        transform: scale(1);
+        opacity: 1;
+      }
+      to {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+
+    .container{
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: row;
+    }
+    .containerMap,.containerInfo{
+        height: 100%;
+        width: 50%;
+    }
+</style>
+
+<body>
+    <div class="container">
+        <div class="containerMap">
+            <div id="map"></div>
+        </div>
+        <div class="containerInfo">
+            <div class="bottomInfoBar">
+                <h3 id="titolo">Titolo del terremoto</h3>
+                <h7 id="magnitudo">Magnitudo</h7>
+                <h7 id="profondita">Profondità</h7>
+                <h7 id="dataOra">Data e ora</h7>
+            </div>
+        </div>
+    </div>
+    <!--SCRIPT-->
+    <script src="https://cdn.jsdelivr.net/npm/ol@v7.4.0/dist/ol.js"></script>
+  <script>
+
+
+
+function formatDate(date) {
+      const currentDate = new Date().toDateString();
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      if (date.toDateString() === currentDate) {
+        return 'oggi';
+      } else if (date.toDateString() === yesterday.toDateString()) {
+        return 'ieri';
+      } else {
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+      }
+    }
+
+    function formatDateTime(dateTime) {
+      const date = new Date(dateTime);
+      const formattedDate = formatDate(date);
+      const hours = parseInt(date.getHours().toString().padStart(2, '0'))+2;//non so il perchè ma si deve aggiungere 2 all'ora pk la query ingv da un risultato sbagliato
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+
+      return `${formattedDate} alle ${hours}:${minutes}`;
+    }
+
+
+
+    //estrai le informazioni dall'url
+    const urlParams = new URLSearchParams(window.location.search);
+    const idTerremoto = urlParams.get('eventId');
+
+    //crea l'url per la fetch
+    const url = "https://webservices.ingv.it/fdsnws/event/1/query?eventid="+idTerremoto+"&format=xml";
+    //https://webservices.ingv.it/fdsnws/event/1/query?eventid=863291&format=xml
+    //https://webservices.ingv.it/fdsnws/1/query?eventid=863291&format=xml
+    //fai la fetch
+    console.log(url);
+    var event;
+    fetch(url)
+        .then(response => response.text())
+        .then(data => {
+
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(data, "text/xml");
+          const events = xmlDoc.getElementsByTagName("event");
+
+          if (events.length === 0) {
+            alert("Errore. Il link non è valido o il terremoto non esiste più");
+            return;
+          }
+          event = events[0];
+          console.log(event);
+          ottieniInfo(event);
+
+        })
+        .catch(error => {
+          console.log(error);
+        });
+        /*const magnitude = urlParams.get('magnitudo');
+        const latitude = urlParams.get('latitudine');
+        const longitude = urlParams.get('longitudine');
+        const description = urlParams.get('descrizione').replace(/-/g, " ");
+        const depth = urlParams.get('profondita').replace(/-/g, " ");
+        const dateTime = urlParams.get('dataOra').replace(/-/g, " ");*/
+        function ottieniInfo(event){
+          console.log(event);
+          const description = event.getElementsByTagName("description")[0];
+          const magnitude = event.getElementsByTagName("magnitude")[0];
+          const origin = event.getElementsByTagName("origin")[0];
+
+          const time = formatDateTime(origin.getElementsByTagName("value")[0].textContent);
+          const place = description.getElementsByTagName("text")[0].textContent;
+          const depth = origin.getElementsByTagName("depth")[0].getElementsByTagName("value")[0].textContent/1000;
+          const magnitudeValue = parseFloat(magnitude.getElementsByTagName("value")[0].textContent);
+          //const longitude = origin.getDate("longitude")[0].getElementsByTagName("value")[0].textContent;
+          //const latitude = origin.getDate("latitude")[0].getElementsByTagName("value")[0].textContent;
+          const latitudeElement = event.querySelector('latitude > value');
+          const longitudeElement = event.querySelector('longitude > value');
+          let latitude = latitudeElement ? latitudeElement.textContent : null;
+          let longitude = longitudeElement ? longitudeElement.textContent : null;
+
+          var map = new ol.Map({
+        target: 'map',
+        layers: [
+          new ol.layer.Tile({
+            source: new ol.source.OSM()
+          })
+        ],
+        view: new ol.View({
+          center: ol.proj.fromLonLat([longitude, latitude]), // Coordinate di default per centrare la mappa sull'Italia
+          zoom: 14 // Zoom di default
+        })
+      });
+
+    // Utilizza i valori estratti per mostrare le informazioni specifiche del terremoto
+
+      /////////////////////////////////////
+      //MAPPA
+            var pinWaveColor;
+            var pinColor;
+            if (magnitudeValue < 2.5) {
+              pinColor = 'green';
+              pinWaveColor='green';
+            } else if (magnitudeValue >= 2.5 && magnitudeValue <= 3.5) {
+              pinColor = 'orange';
+              pinWaveColor='orange';
+            } else if (magnitudeValue > 3.5 && magnitudeValue <= 4.5) {
+              pinColor = 'red';
+              pinWaveColor='red';
+            } else {
+              pinColor = 'purple';
+              pinWaveColor='purple';
+            }
+
+            //crea la div pin
+            var pin = document.createElement('div');
+            pin.className = 'pin ' + pinColor;
+            
+            //crea l'overlay per la div pin
+            var overlay = new ol.Overlay({
+              position: ol.proj.fromLonLat([longitude, latitude]),
+              positioning: 'center-center',
+              element: pin,
+              stopEvent: false
+            });
+
+
+            //prende i dati del terremoto
+
+            //aggiungi i due overlay alla mappa
+            map.addOverlay(overlay);
+
+            //aggiungi il pinWave
+            var pinWave = document.createElement('div');
+              pinWave.className='pinWave ' + pinWaveColor;
+
+              var overlay2 = new ol.Overlay({
+                position: ol.proj.fromLonLat([longitude, latitude]),
+                positioning: 'center-center',
+                element: pinWave,
+                stopEvent: false
+              });
+              map.addOverlay(overlay2);
+              ////////////////////////////////////////////////
+              //BottomInfoBar
+              document.getElementById('titolo').innerHTML=place;
+              document.getElementById('magnitudo').innerHTML="<div style='display:flex; flex-direction:row; justify-content: left; align-items:center;'><div style='background-color: transparent; border: 0.5px solid white; border-radius:5px; padding:3px; padding-left:6px; padding-right:6px; margin:5px;'>"+magnitudeValue+"</div>ML</div>";
+              document.getElementById('profondita').innerHTML="Profondità: "+depth+"km";
+              document.getElementById('dataOra').innerHTML=time;
+              if(idTerremoto=='1895389' || idTerremoto=='7073641'){//terremoto dell'Aquila e di Amatrice
+                const paragrafoMemoriale = document.createElement('p');
+                paragrafoMemoriale.innerHTML='<br><svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path fill="white" d="M640-440q-46-42-89.5-82.5t-77-79.5Q440-641 420-677.5T400-748q0-56 38-94t94-38q32 0 60 13.5t48 36.5q20-23 48-36.5t60-13.5q56 0 94 38t38 94q0 34-20 70.5T806.5-602Q773-563 730-522.5T640-440Zm0-108q59-56 109.5-111.5T800-748q0-23-14.5-37.5T748-800q-14 0-26.5 5.5T700-778l-60 72-60-72q-9-11-21.5-16.5T532-800q-23 0-37.5 14.5T480-748q0 33 50.5 88.5T640-548ZM560-60l-280-78v58H40v-440h318l248 92q33 12 53.5 42t20.5 66h80q50 0 85 33t35 87v40L560-60ZM120-160h80v-280h-80v280Zm438 16 238-74q-3-11-13.5-16.5T760-240H568q-31 0-56-4t-54-14l-69-24 23-76 80 26q18 6 42 9t66 3q0-11-6.5-21T578-354l-234-86h-64v220l278 76ZM200-300Zm400-20Zm-400 20Zm80 0Zm360-374Z"/></svg>Per non dimenticare.';
+                  document.getElementById('dataOra').innerHTML+=paragrafoMemoriale.innerHTML;
+              }
+        }
+//rimuovi i bottoni dalla mappa
+        setTimeout(function(){
+            var mapOverlayButtons=document.querySelector('.ol-zoom.ol-unselectable.ol-control');
+            console.log(mapOverlayButtons);
+            mapOverlayButtons.innerHTML="";//"<a href='mappaMedi.html'><button><span class='material-symbols-outlined'>settings</span></button></a>";
+            var listaUl = document.querySelectorAll('ul');
+            listaUl.forEach(function(ulElement) {
+                ulElement.parentNode.removeChild(ulElement);
+            });
+        },5000);
+      
+  </script>
+</body>
+</html>

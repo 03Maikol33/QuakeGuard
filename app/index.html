@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#212121">
+<meta name="apple-mobile-web-app-title" content="QuakeGuard">
+<link rel="apple-touch-icon" href="resources/icon.png">
+<!--per mappa-->
+<script src="https://cdn.jsdelivr.net/npm/ol@v7.4.0/dist/ol.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.4.0/ol.css">
+<link rel="stylesheet" href="css/font.css">
+<link rel="stylesheet" href="css/magnitudeFilterSelector.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<!---->
+
+<!--ICONE-->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+<link rel="stylesheet" href="css/general.css">
+
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>QuakeGuard</title>
+  <style>
+
+  </style>
+</head>
+<body class="darkThemed blackThemeDark" id="body">
+  <!--dialog overlay-->
+  <div class="dialogOverlay" id="dialogOverlay">
+    <div class="dialog" id="dialog">
+      <p id="dialogMessage"></p>
+      <div style="display: flex; flex-direction: row; width: 100%; justify-content: space-evenly; align-items: center;">
+        <button id="dialogConfirmButton" onclick="">Conferma</button>
+        <button id="dialogCancelButton" onclick="closeDialog()">Annulla</button>
+      </div>
+    </div>
+  </div>
+  <!--SPECIAL OVERLAY-->
+  <div class="specialOverlayContainer" id="specialOverlayContainer">
+    <iframe id="specialOverlay" src="" frameborder="0"></iframe>
+  </div>
+  <!--Specifica map OVERLAY-->
+  <div class="specificMapOverlayContainer" id="specificMapOverlayContainer">
+    <iframe id="specificMapOverlay" src="http://172.20.10.2:5500//QuakeGuard/app/specificVisualizer.html?eventId=41908352&external=0"></iframe>
+  </div>
+  <!--Share image generation-->
+  <div id="imagePreview">
+    <canvas id="generatedImage" width="400" height="200"></canvas>
+    <br>
+  </div>
+  <!--POPUP-->
+  <div class="popup darkThemed blackThemeDark" id="popup">
+    <img>
+    <p></p>
+    <button onclick="closePopup()">OK</button>
+  </div>
+  <!--SPLASH SCREEN
+  <div class="splashScreen" id="splashScreen">
+    <img src="resources/icon.png">
+    <h2>QuakeGuard</h2>
+    <a class="beta">BETA</a>
+    <p class="miniInfoText">By Maikol Gasparroni</p>
+  </div>-->
+  <!--NOTIFICA-->
+  <div class="notifica" id="notifica">
+    <div class="emitter"></div>
+  </div>
+  <!--SPECIFIC MAP VISUALIZER OVERLAY DIV--> 
+  <div style="display: none;" class="specificMapVisualizerOverlayDiv" id="specificMapVisualizerOverlayDiv">
+    <div class="earthquakeSpecificMapInfoAndTools darkThemed blackThemeDark">
+      <div class="indietroBTN"><h3 onclick="chiudiMappaSpecifica()">&lt;indietro</h3></div>
+      <div class="specificContainer">
+        <h2 id="specificTitle">Caricamento...</h2>
+        <div id="specificInfo"></div>
+        <div id="specificMagnitude">0.0</div>
+        <div class="details" id="specificDataOra"></div>
+      </div>
+    </div>
+    <div class="specificMap" id="specificMap"></div>
+  </div>
+  <!---->
+  <!-- Headerbar -->
+  <div class="headerbar lightThemed blackThemeLight" id="headerbar">
+    <div class="quakeGuardTextContainer"><p>QuakeGuard.it</p></div>
+    <div class="magnitudeFilterContainer">
+      <div class="radio-inputs darkThemed blackThemeDark">
+        <label class="radio">
+          <input type="radio" name="radio" id="opzione1Magnitudo" >
+          <span class="name" onclick="fetchEarthquakes(0)">0</span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="radio" id="opzione2Magnitudo">
+          <span class="name" onclick="fetchEarthquakes(2)">2</span>
+        </label>
+            
+        <label class="radio">
+          <input type="radio" name="radio" id="opzione3Magnitudo">
+          <span class="name" onclick="fetchEarthquakes(4)">4</span>
+        </label>
+      </div>
+    </div>
+  </div>
+  <!--Fine Headerbar-->
+  <div class="container" id="lista">
+    <h1 id="inizio">Ultimi Terremoti</h1>
+    <p class="miniInfoText">La lista è generata usando l'API di <a href="https://www.ingv.it/" target="_blank" class="miniInfoText">INGV.</a></p>
+    <div class="topTools lightThemed blackThemeLight" id="topTools">
+      <button class="refreshBtn" type="button" onclick="aggiorna()">
+        <svg viewBox="0 0 16 16" class="bi bi-arrow-repeat" fill="currentColor" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
+        <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"></path>
+        <path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z" fill-rule="evenodd"></path>
+      </svg>
+      Aggiorna
+      </button>
+      <h6 id="contaTerremoti">Terremoti visualizzati: 0</h6>
+    </div>
+    
+    
+    <div class="loadingContainer">
+      <div class="pinWave green"></div>
+      <p class="miniInfoText">In attesa di risposta da INGV...</p>
+    </div>
+
+    <div id="earthquake-list">
+      <!--TERREMOTO DI ESEMPIO-->
+      <div class="earthquake" id="terremotoEsempioNoMap" style="display: block;">
+        <div class="title">Luna, cratere ovest</div>
+        <div class="info-">
+          <strong><a class="valMagnitude">3.2</a></strong>Ml <br><p><strong>Profondità:</strong>12 km</p>
+        </div>
+        <div class="details">oggi alle 12:00</div>
+        <div class="containerBottoni">
+          <svg onclick='hideShowMap("+earthquakeDiv.id+")' viewBox='0 0 576 512' height='24' xmlns='http://www.w3.org/2000/svg'><path d='m288 0c-69.59 0-126 56.41-126 126 0 56.26 82.35 158.8 113.9 196.02 6.39 7.54 17.82 7.54 24.2 0 31.55-37.22 113.9-139.76 113.9-196.02 0-69.59-56.41-126-126-126zm0 168c-23.2 0-42-18.8-42-42s18.8-42 42-42 42 18.8 42 42-18.8 42-42 42zm-267.88 47.95a32.006 32.006 0 0 0 -20.12 29.71v250.32c0 11.32 11.43 19.06 21.94 14.86l138.06-62.84v-233.08c-8.84-15.98-16.07-31.54-21.25-46.42zm267.88 143.72c-14.07 0-27.38-6.18-36.51-16.96-19.66-23.2-40.57-49.62-59.49-76.72v182l192 64v-245.99c-18.92 27.09-39.82 53.52-59.49 76.72-9.13 10.77-22.44 16.95-36.51 16.95zm266.06-198.51-138.06 62.84v288l139.88-55.95a31.996 31.996 0 0 0 20.12-29.71v-250.32c0-11.32-11.43-19.06-21.94-14.86z' fill='white'/></svg>
+          <svg onclick='share("+earthquakeDiv.id+")' xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M0 0h24v24H0V0z' fill='none'/><path d='M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z' fill='white'/></svg>
+        </div>
+      </div>
+      <!--FINE TERREMOTO DI ESEMPIO-->
+      <!--TERREMOTO DI ESEMPIO-->
+      <div class="earthquake" id="terremotoEsempioMap" style="display: block;">
+        <div class="title">Luna, cratere ovest</div>
+        <div class="info-">
+          <strong><a class="valMagnitude">3.2</a></strong>Ml <br><p><strong>Profondità:</strong>12 km</p>
+        </div>
+        <div class="details">oggi alle 12:00</div>
+        <div class="containerBottoni">
+          <svg onclick='hideShowMap("+earthquakeDiv.id+")' viewBox='0 0 576 512' height='24' xmlns='http://www.w3.org/2000/svg'><path d='m288 0c-69.59 0-126 56.41-126 126 0 56.26 82.35 158.8 113.9 196.02 6.39 7.54 17.82 7.54 24.2 0 31.55-37.22 113.9-139.76 113.9-196.02 0-69.59-56.41-126-126-126zm0 168c-23.2 0-42-18.8-42-42s18.8-42 42-42 42 18.8 42 42-18.8 42-42 42zm-267.88 47.95a32.006 32.006 0 0 0 -20.12 29.71v250.32c0 11.32 11.43 19.06 21.94 14.86l138.06-62.84v-233.08c-8.84-15.98-16.07-31.54-21.25-46.42zm267.88 143.72c-14.07 0-27.38-6.18-36.51-16.96-19.66-23.2-40.57-49.62-59.49-76.72v182l192 64v-245.99c-18.92 27.09-39.82 53.52-59.49 76.72-9.13 10.77-22.44 16.95-36.51 16.95zm266.06-198.51-138.06 62.84v288l139.88-55.95a31.996 31.996 0 0 0 20.12-29.71v-250.32c0-11.32-11.43-19.06-21.94-14.86z' fill='white'/></svg>
+          <svg onclick='share("+earthquakeDiv.id+")' xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M0 0h24v24H0V0z' fill='none'/><path d='M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z' fill='white'/></svg>
+        </div>
+        <div id="map-terremotoEsempioMap" class="map"></div>
+        <p style="display: none;" id="latitudine">12</p>
+        <p style="display: none;" id="longitudine">12</p>
+      </div>
+      <!--FINE TERREMOTO DI ESEMPIO-->
+    </div>
+
+    <!--PULSANTE TORNA SU-->
+      <div id="tornasu" onclick="scorriAllaCima()">
+        <div>&#8682;</div>
+      </div>     
+    <!---->
+
+    <p class="miniInfoText" style="margin-bottom: 50px ;">Per visualizzare altri terremoti consulta il <a class="miniInfoText" href="https://www.ingv.it/">sito ufficiale di INGV.</a></p>
+
+  </div>
+  <div class="containerMappa" id="mappa">
+    <!--<h1 id="inizio">Mappa dei Terremoti</h1>
+    <p class="miniInfoText">Questa pagina è generata usando l'API di <a href="https://www.ingv.it/" target="_blank" class="miniInfoText">INGV</a>, la mappa open source di <a href="https://www.esri.com/it-it/arcgis/products/data/data-portfolio/basemaps" target="_blank" class="miniInfoText">esri</a> e la libreria <a href="https://leafletjs.com/" target="_blank" class="miniInfoText">Leaflet</a>.</p>-->
+    <iframe class="iframeMappa" id="containerMappa" src=""></iframe>
+  </div>
+  <div class="container" id="vicinoMe">
+    <h1 id="inizio">Terremoti Salvati</h1>
+    <p class="miniInfoText">Vengono mostrati i terremoti salvati dall'utente.</p>
+    <div class="containerTerremotiSalvati" id="savedQuakesList">
+      
+    </div>
+  </div>
+  <div class="container" id="cerca">
+      <h1 id="inizio">Cerca</h1>
+      <!--<iframe style="width: 100%; border:none; height: 100vh;" src="cerca.html"></iframe>-->
+      <div class="earthquake lightThemed blackThemeLight">
+        <div class="inline">
+          <div class="incol" style="width: 50%;">
+            <h2>Data</h2>
+            <div>Dal giorno: <br><input id="giornoPartenza" class="dateInput darkThemed blackThemeDark" type="date"></div>
+            <div>Al giorno: <br><input id="giornoFine" class="dateInput darkThemed blackThemeDark" type="date"></div>
+          </div>
+          <div class="incol" style="width: 50%;">
+            <h2>Magnitudo</h2>
+            <div>Dalla magnitudo: <br><select id="magnitudoPartenza" class="magnitudeInput darkThemed blackThemeDark">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            </select></div>
+            <div>Alla magnitudo: <br><select id="magnitudoFine" class="magnitudeInput darkThemed blackThemeDark">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            </select></div>
+          </div>
+        </div>
+        <input class="button" id="invioBtn" type="button" onclick="cerca()" value="Cerca">
+      </div>
+      <div class="containerTerremotiCercati" id="searchedQuakesList">
+      
+      </div>   
+  </div>
+  <div class="container" id="impostazioni">
+    <h1 id="inizio">Impostazioni</h1>
+    <!--<div class="containerImpostazione" style="background-color: rgb(0, 0, 0);"><p>Attenzione, questa è una versione <a class="beta">BETA</a>. <br>Potrebbero essere presenti errori e funzionalità incomplete. E' possibile segnalare gli errori tramite l'apposito form presente più in basso nelle impostazioni.</p></div>-->
+    <h3>Notifiche</h3>
+      <a href="https://whatsapp.com/channel/0029VbAsWEM1CYoa5ckfFz3G" style="color: white;">
+      <div class="containerImpostazione conFreccia lightThemed blackThemeLight">
+        <div>
+          <svg style="transform: translateY(6px);" height="24px" width="24px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 58 58" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path style="fill:#2CB742;" d="M0,58l4.988-14.963C2.457,38.78,1,33.812,1,28.5C1,12.76,13.76,0,29.5,0S58,12.76,58,28.5 S45.24,57,29.5,57c-4.789,0-9.299-1.187-13.26-3.273L0,58z"></path> <path style="fill:#FFFFFF;" d="M47.683,37.985c-1.316-2.487-6.169-5.331-6.169-5.331c-1.098-0.626-2.423-0.696-3.049,0.42 c0,0-1.577,1.891-1.978,2.163c-1.832,1.241-3.529,1.193-5.242-0.52l-3.981-3.981l-3.981-3.981c-1.713-1.713-1.761-3.41-0.52-5.242 c0.272-0.401,2.163-1.978,2.163-1.978c1.116-0.627,1.046-1.951,0.42-3.049c0,0-2.844-4.853-5.331-6.169 c-1.058-0.56-2.357-0.364-3.203,0.482l-1.758,1.758c-5.577,5.577-2.831,11.873,2.746,17.45l5.097,5.097l5.097,5.097 c5.577,5.577,11.873,8.323,17.45,2.746l1.758-1.758C48.048,40.341,48.243,39.042,47.683,37.985z"></path> </g> </g></svg>
+          <h10>  Entra nel canale Whatsapp</h10>
+        </div>
+        <div><svg id='settingArrow' width="24" height="24" xmlns="http://www.w3.org/2000/svg" clip-rule="evenodd"><path fill="white" d="M4 .755l14.374 11.245-14.374 11.219.619.781 15.381-12-15.391-12-.609.755z"/></svg></div>
+      </div>
+      </a>
+    <h3>Personalizzazione</h3>
+    <div class="containerImpostazione lightThemed blackThemeLight">
+      <div class="settingTextLeft"><h10>Limite lista</h10></div>
+      <div class="settingOptionRight">
+        <select id="listLimitSetting" class="selettoriImpostazioni darkThemed blackThemeDark" onchange="saveListLimitSetting()" >
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="120">120</option>
+        </select>
+      </div>
+    </div>
+    <p class="miniInfoText">Limita il numero di terremoti che vengono visualizzati nella lista principale. Un numero elevato potrebbe comportare tempi di attesa più lunghi.</p>
+    <div class="containerImpostazione lightThemed blackThemeLight">
+      <div class="settingTextLeft"><h10>Dimensione pin</h10></div>
+      <div class="settingOptionRight">
+        <select id="mapPointerSizeSelector" class="selettoriImpostazioni darkThemed blackThemeDark" onchange="changeMapPointerSize()">
+          <option value="p">Piccoli</option>
+          <option value="m">Medi</option>
+          <option value="g">Grandi</option>
+        </select>
+      </div>
+    </div>
+    <div class="containerImpostazione lightThemed blackThemeLight">
+      <div class="settingTextLeft"><h10>Tema mappa</h10></div>
+      <div class="settingOptionRight">
+        <select id="mapThemeSelector" class="selettoriImpostazioni darkThemed blackThemeDark" onchange="changeMapTheme()">
+          <option value="dark">Scuro</option>
+          <option value="light">Chiaro</option>
+          <option value="satellite">Satellitare</option>
+        </select>
+      </div>
+    </div>
+    <div class="containerImpostazione lightThemed blackThemeLight">
+      <div class="settingTextLeft"><h10>Tema dell'app</h10></div>
+      <div class="settingOptionRight">
+        <select id="appThemeSelector" class="selettoriImpostazioni darkThemed blackThemeDark" onchange="changeTheme()">
+          <option value="glass">Vetro</option>
+          <option value="black">Nero</option>
+          <option value="pink">Rosa</option>
+          <option value="blue">Blu</option>
+          <option value="brown">Marrone</option>
+          <option style="display: none;" value="pride">Pride</option>
+          <option style="display: none;" value="xMAS">xMAS</option>
+        </select>
+      </div>
+    </div>
+    <h3>Accesibilità</h3>
+    <div class="containerImpostazione lightThemed blackThemeLight">
+      <div class="settingTextLeft"><h10>Bordi visibili</h10></div>
+      <div class="settingOptionRight">
+        <select id="bordiVisibiliOption" class="selettoriImpostazioni darkThemed blackThemeDark" onchange="changeBordiVisibili()">
+          <option value="no">Disattivato</option>
+          <option value="si">Attivato</option>
+        </select>
+      </div>
+    </div>
+    <div class="containerImpostazione lightThemed blackThemeLight">
+      <div class="settingTextLeft"><h10>Testi contrastati</h10></div>
+      <div class="settingOptionRight">
+        <select id="testiContrastatiOption" class="selettoriImpostazioni darkThemed blackThemeDark" onchange="changeTestiContrastati()">
+          <option value="no">Disattivato</option>
+          <option value="si">Attivato</option>
+        </select>
+      </div>
+    </div>
+    <div class="containerImpostazione lightThemed blackThemeLight">
+      <div class="settingTextLeft"><h10>Dimensione testi</h10></div>
+        <div class="settingOptionRight">
+        <select id="dimensioneTestoOption" class="selettoriImpostazioni darkThemed blackThemeDark" onchange="changeDimensioneTesto()">
+          <option value="normal">Normale</option>
+          <option value="bigger">Maggiorata</option>
+        </select>
+      </div>
+    </div>
+      
+      <h3>Ripristino dei dati</h3>
+      <div onclick="exportSavedQuakes()" class="containerImpostazione lightThemed blackThemeLight">
+        <h10>Esporta lista terremoti salvati</h10>
+      </div>
+      <div class="containerImpostazione lightThemed blackThemeLight" style="flex-direction: column; justify-content: left; align-items: center;">
+        <h10>Importa lista terremoti salvati</h10>
+        <!--<textarea placeholder="Incolla qui la lista di terremoti" class="darkThemed blackThemeDark" id="importSavedQuakesTextArea"></textarea>-->
+        <button class="button darkThemed blackThemeDark" style="color: white;" onclick="importSavedQuakes()">
+          <svg xmlns='http://www.w3.org/2000/svg' style="margin-right: 10px;" height='24px' viewBox='0 -960 960 960' width='24px' fill='#e8eaed'><path d='M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h240l80 80h320q33 0 56.5 23.5T880-640v400q0 33-23.5 56.5T800-160H160Zm0-80h640v-400H447l-80-80H160v480Zm0 0v-480 480Z'/></svg>
+          Importa
+        </button>
+      </div>
+      <div onclick="dialog('Sei sicuro di voler eliminare tutti i dati salvati? Questa azione non può essere annullata.', 'deleteSavedData')" class="containerImpostazione lightThemed blackThemeLight" style="color: red;">
+        <svg xmlns='http://www.w3.org/2000/svg' style="margin-right: 10px;" height='24px' viewBox='0 -960 960 960' width='24px' fill='#e8eaed'>
+          <path d='M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm80-160h80v-360h-80v360Zm160 0h80v-360h-80v360Z' fill='white'/>
+        </svg>
+        <div><h10>Elimina i dati salvati</h10></div>
+      </div>
+
+      <div onclick="exportConfiguration()" class="containerImpostazione lightThemed blackThemeLight">
+        <h10>Esporta la configurazione attuale</h10>
+      </div>
+      <div class="containerImpostazione lightThemed blackThemeLight" style="flex-direction: column; justify-content: left; align-items: center;">
+        <h10>Importa una configurazione</h10>
+        <!--<textarea placeholder="Incolla qui la lista di terremoti" class="darkThemed blackThemeDark" id="importSavedQuakesTextArea"></textarea>-->
+        <button class="button darkThemed blackThemeDark" style="color: white;" onclick="importConfiguration()">
+          <svg xmlns='http://www.w3.org/2000/svg' style="margin-right: 10px;" height='24px' viewBox='0 -960 960 960' width='24px' fill='#e8eaed'><path d='M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h240l80 80h320q33 0 56.5 23.5T880-640v400q0 33-23.5 56.5T800-160H160Zm0-80h640v-400H447l-80-80H160v480Zm0 0v-480 480Z'/></svg>
+          Importa
+        </button>
+      </div>
+      <p class="miniInfoText">Seleziona esclusivamente un file generato da questa app. Utilizzare file diversi potrebbe compromettere il funzionamento dell'applicazione.</p>
+      <h3>Altro</h3>
+      <a href="https://forms.gle/Gq8LfV1sudGgvHx16" style="color: white;">
+      <div class="containerImpostazione conFreccia lightThemed blackThemeLight">
+        <div><h10>Invia un suggerimento</h10></div>
+        <div><svg id='settingArrow' width="24" height="24" xmlns="http://www.w3.org/2000/svg" clip-rule="evenodd"><path fill="white" d="M4 .755l14.374 11.245-14.374 11.219.619.781 15.381-12-15.391-12-.609.755z"/></svg></div>
+      </div>
+      </a>
+      <a href="https://forms.gle/PWbHSj8inU2uncoUA" style="color: white;">
+        <div class="containerImpostazione conFreccia lightThemed blackThemeLight">
+          <div><h10>Segnala un bug</h10></div>
+          <div><svg id='settingArrow' width="24" height="24" xmlns="http://www.w3.org/2000/svg" clip-rule="evenodd"><path fill="white" d="M4 .755l14.374 11.245-14.374 11.219.619.781 15.381-12-15.391-12-.609.755z"/></svg></div>
+        </div>
+        </a>
+      <div onclick="shareApp()" class="containerImpostazione conFreccia lightThemed blackThemeLight">
+        <div><h10>Consiglia l'app agli amici!</10></div>
+        <div><svg id='settingArrow' width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path fill="white" d="M4 .755l14.374 11.245-14.374 11.219.619.781 15.381-12-15.391-12-.609.755z"/></svg></div>
+      </div>
+      <div onclick="sendNotification('Notifica di test.', 1000)" class="containerImpostazione lightThemed blackThemeLight">
+        <div><h10>Ricevi notifica Test</10></div>
+      </div>
+      <h3>Credits</h3>
+      <a href="https://www.instagram.com/maikol_gasparroni/" style="color: white;">
+        <div class="credits lightThemed blackThemeLight">
+          <img src="resources/maikol.jpg">
+          <h3>Creato da Maikol Gasparroni</h3>
+        </div>
+      </a>
+      <a href="https://www.instagram.com/quakeguard.it/" style="color: white;">
+        <div class="credits lightThemed blackThemeLight">
+          <img src="resources/icon-min.png">
+          <h3>Seguici su Instagram</h3>
+        </div>
+      </a>
+      <p>&copy; <!--Current year--> <script>document.write(new Date().getFullYear())</script> Maikol Gasparroni. Tutti i diritti riservati.</p>
+      <h3>Informazioni legali</h3>
+      <iframe style="width: 100%;" src="infoLegali.html"></iframe>
+      <a href="infoLegali.html"><button class="button darkThemed blackThemeDark"><svg xmlns='http://www.w3.org/2000/svg' height='24px' viewBox='0 -960 960 960' width='24px' fill='#e8eaed'><path d='M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z'/></svg>&nbsp;Apri esternamente.</button></a>
+      <h3>Info versione.</h3>
+      <iframe style="width: 100%;" src="infoVersione.html"></iframe>
+      <a href="infoVersione.html"><button class="button darkThemed blackThemeDark"><svg xmlns='http://www.w3.org/2000/svg' height='24px' viewBox='0 -960 960 960' width='24px' fill='#e8eaed'><path d='M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z'/></svg>&nbsp;Apri esternamente.</button></a>
+      <!--DEBUGGING-->
+      
+        <h3>Debugging e sviluppo</h3>
+        <details><summary><h10>Console</h10></summary>
+          <div class="containerImpostazione lightThemed blackThemeLight">
+            <div id="logContainer" class="consoleLogContainer">
+              <div id="logContent"></div>
+            </div>
+          </div>
+          <iframe src="konami.html" style="width: 100%; min-height:200px; height: ;: fit-content;" id="konamiFrame" style="display: block;"></iframe>
+        </details>
+      </div>
+    </div>
+
+  <!-- Navbar -->
+  <div class="navbar lightThemed blackThemeLight" id="navbar">
+    <div class="containerSezioniNavbar">
+      <div class="nav-item active">
+          <a onclick="scorriAllaCima()">
+            <svg height='24' viewBox='0 0 8 8'  xmlns='http://www.w3.org/2000/svg'><path d='m.5 0c-.28 0-.5.22-.5.5s.22.5.5.5.5-.22.5-.5-.22-.5-.5-.5zm1.5 0v1h6v-1zm-1.5 2c-.28 0-.5.22-.5.5s.22.5.5.5.5-.22.5-.5-.22-.5-.5-.5zm1.5 0v1h6v-1zm-1.5 2c-.28 0-.5.22-.5.5s.22.5.5.5.5-.22.5-.5-.22-.5-.5-.5zm1.5 0v1h6v-1zm-1.5 2c-.28 0-.5.22-.5.5s.22.5.5.5.5-.22.5-.5-.22-.5-.5-.5zm1.5 0v1h6v-1z'/></svg>
+          </a>
+      </div>
+
+      <div class="nav-item">
+        <a onclick="scorriAllaCima()">
+          <svg viewBox='0 0 576 512' height='24' xmlns='http://www.w3.org/2000/svg'><path d='m288 0c-69.59 0-126 56.41-126 126 0 56.26 82.35 158.8 113.9 196.02 6.39 7.54 17.82 7.54 24.2 0 31.55-37.22 113.9-139.76 113.9-196.02 0-69.59-56.41-126-126-126zm0 168c-23.2 0-42-18.8-42-42s18.8-42 42-42 42 18.8 42 42-18.8 42-42 42zm-267.88 47.95a32.006 32.006 0 0 0 -20.12 29.71v250.32c0 11.32 11.43 19.06 21.94 14.86l138.06-62.84v-233.08c-8.84-15.98-16.07-31.54-21.25-46.42zm267.88 143.72c-14.07 0-27.38-6.18-36.51-16.96-19.66-23.2-40.57-49.62-59.49-76.72v182l192 64v-245.99c-18.92 27.09-39.82 53.52-59.49 76.72-9.13 10.77-22.44 16.95-36.51 16.95zm266.06-198.51-138.06 62.84v288l139.88-55.95a31.996 31.996 0 0 0 20.12-29.71v-250.32c0-11.32-11.43-19.06-21.94-14.86z' fill='white'/></svg>
+        </a>
+      </div>
+
+      <div class="nav-item">
+        <a onclick="scorriAllaCima()">
+          <svg fill="#e8eaed" width="24px" viewBox="0 -960 960 960" height="24px" xmlns="http://www.w3.org/2000/svg"><path d="M200-120v-640q0-33 23.5-56.5T280-840h400q33 0 56.5 23.5T760-760v640L480-240 200-120Z"></path></svg>
+        </a>
+      </div>
+
+      <div class="nav-item">
+        <a onclick="scorriAllaCima()">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>
+        </a>
+      </div>
+
+      <div class="nav-item">
+        <a onclick="scorriAllaCima()">
+          <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="m328 256c0 39.8-32.2 72-72 72s-72-32.2-72-72 32.2-72 72-72 72 32.2 72 72zm104-72c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72zm-352 0c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72z"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="sectionHigliterLine">
+      <svg id='selettoreLinea' version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="18.36002" height="2" viewBox="0,0,18.36002,2"><g transform="translate(-230.81999,-179)"><g data-paper-data="{&quot;isPaintingLayer&quot;:true}" fill="none" fill-rule="nonzero" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" style="mix-blend-mode: normal"><path d="M248.18001,180h-16.36002"/></g></g></svg>
+    </div>
+  </div>
+  <!--FINE NAVBAR-->
+  
+  <!--SCRIPT AJAX per database mysql-->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <!--SCRIPT DI BASE-->
+  <script src="scripts/script.js"></script>
+  <!--SCRIPT SEZIONE CERCA-->
+  <script src="scripts/cerca.js"></script>
+  <!--SCRIPT SEZIONE CONDIVISIONE TERREMOTI-->
+  <script src="scripts/shareQuake.js"></script>
+  <!--SCRIPT GESTIONE TEMI SPECIALI-->
+  <script src="scripts/specialThemes.js"></script>
+  <!--SCRIPT PER I TOOLS DI DEBUGGING-->
+  <script src="scripts/debugging.js"></script>
+</body>
+</html>
