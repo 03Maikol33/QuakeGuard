@@ -4,6 +4,16 @@ Storico delle versioni dell'app QuakeGuard. Le versioni contrassegnate come **BE
 
 ---
 
+## [1.3.3 BETA] - 13/07/2025
+### Aggiunto
+#### Migrazione su GitHub
+- Aggiunto il tema Vetro
+- Sistemato un bug che non consentiva al filtro megnitudo sulla lista principale di funzionare correttamente
+
+---
+
+---
+
 ## [1.3.2] - 24/05/2025
 ### Aggiunto
 - Ripristinata la funzionalità di ricerca
