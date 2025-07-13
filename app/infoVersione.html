@@ -8,7 +8,7 @@
     <title>Changelog Versioni</title>
     <style>
         body {
-            background-color: rgba(0, 0, 0, 0.468);
+            background-color: rgb(0, 0, 0);
             font-family: "Nunito", sans-serif;
             color: white;
             padding: 20px;
@@ -24,14 +24,14 @@
         }
         
         .beta {
-            color: #ff6b6b;
+            color: white;
             font-weight: bold;
         }
         
         h4 {
             margin-top: 10px;
             margin-bottom: 5px;
-            color: #4fc3f7;
+            color: green;
         }
         
         h5 {
@@ -39,7 +39,7 @@
             font-style: italic;
             margin-top: 5px;
             margin-bottom: 10px;
-            color: #a5d6a7;
+            color: rgba(0, 128, 0, 0.537);
         }
         
         ul {
@@ -55,6 +55,12 @@
             text-align: center;
             padding: 20px;
         }
+        
+        .error {
+            color: #ff6b6b;
+            text-align: center;
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
@@ -64,8 +70,13 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            fetch('CHANGELOG.md')
-                .then(response => response.text())
+            fetch('../CHANGELOG.md')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('File non trovato');
+                    }
+                    return response.text();
+                })
                 .then(text => {
                     const changelogContainer = document.getElementById('changelogContainer');
                     changelogContainer.innerHTML = parseMarkdownToHTML(text);
@@ -73,7 +84,7 @@
                 .catch(error => {
                     console.error('Errore nel caricamento del changelog:', error);
                     document.getElementById('changelogContainer').innerHTML = 
-                        '<div class="infoVer"><p>Impossibile caricare il changelog. Si prega di riprovare più tardi.</p></div>';
+                        '<div class="error"><p>Impossibile caricare il changelog. Si prega di verificare che il file CHANGELOG.md esista nella cartella principale.</p></div>';
                 });
         });
 

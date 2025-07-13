@@ -76,7 +76,7 @@ function generateImage(title, magnitude, depth, date, callback) {
             const filesArray = [new File([blob], "quakeguard_share.png", { type: "image/png" })];
             const shareData = {
                 title: "C'è stato un terremoto!",
-                text: `Terremoto di magnitudo ${magnitude}. Scopri di più: https://03Maikol33.github.io/app/specificVisualizer.html?eventId=${id}`,
+                text: `Terremoto di magnitudo ${magnitude}. Scopri di più: https://03Maikol33.github.io/QuakeGuard/app/specificVisualizer.html?eventId=${id}`,
                 files: filesArray
             };
 
@@ -87,7 +87,7 @@ function generateImage(title, magnitude, depth, date, callback) {
                     sendNotification("Condivisione avvenuta con successo", 3000, 0);
                 } else {
                     // Fallback per browser che non supportano la condivisione di file
-                    const shareUrl = `https://03Maikol33.github.io/app/specificVisualizer.html?eventId=${id}`;
+                    const shareUrl = `https://03Maikol33.github.io/QuakeGuard/app/specificVisualizer.html?eventId=${id}`;
                     await navigator.share({
                         title: "C'è stato un terremoto!",
                         text: `Terremoto di magnitudo ${magnitude}. Scopri di più: ${shareUrl}`

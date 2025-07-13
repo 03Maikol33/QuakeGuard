@@ -8,7 +8,8 @@ Storico delle versioni dell'app QuakeGuard. Le versioni contrassegnate come **BE
 ### Aggiunto
 #### Migrazione su GitHub
 - Aggiunto il tema Vetro
-- Sistemato un bug che non consentiva al filtro megnitudo sulla lista principale di funzionare correttamente
+- Sistemato un bug che non consentiva al filtro magnitudo sulla lista principale di funzionare correttamente
+- Sistemati alcuni collegamenti interrotti a causa della migrazione di dominio
 
 ---
 
