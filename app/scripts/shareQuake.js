@@ -45,7 +45,7 @@ function generateImage(title, magnitude, depth, date, callback) {
         ctx.quadraticCurveTo(rectX, rectY, rectX + 5, rectY);
         ctx.closePath();
         ctx.stroke();
-        ctx.fillStyle = '#000';
+        ctx.fillStyle = '#008000';
         ctx.fill();
         ctx.fillStyle = '#fff';
         ctx.fillText(magnitudeText, rectX + padding, rectY + 30);
@@ -76,7 +76,7 @@ function generateImage(title, magnitude, depth, date, callback) {
             const filesArray = [new File([blob], "quakeguard_share.png", { type: "image/png" })];
             const shareData = {
                 title: "C'è stato un terremoto!",
-                text: `Terremoto di magnitudo ${magnitude}. Scopri di più: https://03Maikol33.github.io/QuakeGuard/app/specificVisualizer.html?eventId=${id}`,
+                text: `&#9888;C'è stato un terremoto!\n Terremoto di magnitudo ${magnitude} registrato a ${location}.\n \n  Scopri di più: https://03Maikol33.github.io/QuakeGuard/app/specificVisualizer.html?eventId=${id}`,
                 files: filesArray
             };
 
