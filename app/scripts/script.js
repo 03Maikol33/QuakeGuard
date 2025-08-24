@@ -59,7 +59,7 @@
   window.onload = function() {
     if (!isMobile()) {
       // Reindirizza se non è un dispositivo mobile
-      openPopup("Questa app non è ottimizzata per la visualizzazione desktop.", "Prosegui comunque", "resources/error.png");
+      //openPopup("Questa app non è ottimizzata per la visualizzazione desktop.", "Prosegui comunque", "resources/error.png");
       return;
       //window.location.href = "https://www.maikolgasparroni2003.altervista.org/QuakeGuard/home.html";
     }

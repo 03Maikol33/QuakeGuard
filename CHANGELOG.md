@@ -4,6 +4,14 @@ Storico delle versioni dell'app QuakeGuard. Le versioni contrassegnate come **BE
 
 ---
 
+## [1.3.4 BETA] - 24/08/2025
+### Aggiunto
+- Aggiunta la visualizzazione desktop
+
+---
+
+---
+
 ## [1.3.3 BETA] - 13/07/2025
 ### Aggiunto
 #### Migrazione su GitHub
